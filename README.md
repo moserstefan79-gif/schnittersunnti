@@ -30,9 +30,19 @@ Admins sehen unter `/admin` den vollständigen Plan mit Namen, Telefon und Manns
 
 Direkt in der Tabelle `shifts` (Supabase Table Editor) – `capacity` erhöhen, Zeiten ändern, Posten ergänzen. Die Kapazität wird beim Anmelden datenbankseitig geprüft (kein Überbuchen).
 
-## Deploy
+## Deploy (GitHub + Netlify)
 
-`npm run build` → `dist/` auf Netlify/Vercel/Cloudflare Pages. SPA-Routing: alle Pfade auf `index.html` umleiten (Netlify: `_redirects` mit `/* /index.html 200`).
+1. Repo `moserstefan79-gif/schnittersunnti` auf GitHub anlegen (leer, ohne README) und pushen:
+   ```
+   git remote add origin git@github.com:moserstefan79-gif/schnittersunnti.git
+   git push -u origin main
+   ```
+2. Netlify → «Add new site» → «Import from Git» → das Repo wählen. Build-Befehl und Publish-Ordner kommen aus `netlify.toml`.
+3. Unter Site configuration → Environment variables `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` setzen, dann «Trigger deploy».
+4. Domain `schnittersunnti.ch` unter Domain management hinzufügen; bei Wix/Registrar die DNS-Einträge gemäss Netlify-Anleitung setzen (A/ALIAS auf Netlify, `www` als CNAME). Netlify stellt das SSL-Zertifikat automatisch aus.
+5. In Supabase die Netlify-URL (und später `https://www.schnittersunnti.ch`) als Site-URL/Redirect eintragen.
+
+Jeder Push auf `main` löst danach automatisch ein Deploy aus.
 
 ## Struktur
 
