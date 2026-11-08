@@ -1,0 +1,8 @@
+[functions.payrexx-create]
+verify_jwt = false
+[functions.payrexx-check]
+verify_jwt = false
+[functions.payrexx-webhook]
+verify_jwt = false
+[functions.payrexx-refund]
+verify_jwt = true

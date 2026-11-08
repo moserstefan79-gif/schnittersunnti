@@ -3,10 +3,10 @@ import { EVENT } from '../lib/supabase.js'
 import Matches from '../components/Matches.jsx'
 
 const menu = [
-  { land: 'Schweiz', dish: 'Älplermagronen mit Apfelmus', note: 'Der Klassiker vom Beizli – hausgemacht.' },
-  { land: 'Deutschland', dish: 'Fleischkäse mit Mütschli', note: 'Dazu ein kühles Bier aus dem Biergarten.' },
-  { land: 'England', dish: 'Fish & Chips', note: 'Knusprig, mit Malzessig oder Mayonnaise.' },
-  { land: 'Brasilien', dish: 'Caipirinha und Drinks', note: 'An der Bar, bis spät in die Nacht.' },
+  { land: 'Essen', dish: 'Fish & Chips, Älplermagronen, Fleischkäse im Mütschli', note: 'Drei Länder, eine Küche – ab CHF 9.–' },
+  { land: 'Bierschenke', dish: 'Bier im Chübeli & Brezel', note: 'Auch alkoholfrei. Depot CHF 2.– auf den Becher.' },
+  { land: 'Wein', dish: 'Legio Julius – weiss, rosé, rot', note: 'Glas 1 dl CHF 5.–, Flasche CHF 35.–' },
+  { land: 'Brasil-Bar', dish: 'Batida de Coco & Ipanema', note: 'Mit oder ohne Alkohol, CHF 8.–/10.–' },
 ]
 
 const partners = [
@@ -81,6 +81,7 @@ export default function Home() {
               Biergarten, Festwirtschaft und Bar – mit Küche aus vier Fussballnationen.
               Ob mit der Clique oder zum Leutetreffen: Hier ist Leben drin.
             </p>
+            <p className="mt-4 text-ink/80 max-w-md">Neu: am Tisch per QR-Code bestellen und mit Twint bezahlen – wir bringen es dir oder du holst es an der Theke ab.</p>
             <p className="mt-4 text-ink/80 max-w-md">Und auf dem Screen: die K.o.-Spiele der Frauen-WM 2027 – <a href="#spiele" className="underline hover:text-orange-deep">was wir zeigen</a>.</p>
             <figure className="mt-8 max-w-md">
               <img src="/liegestuhl.jpg" alt="Liegestuhl mit dem Home-of-Football-Logo" loading="lazy" width="1050" height="1400" className="w-full aspect-[3/4] object-cover object-[50%_60%] rounded-2xl" />

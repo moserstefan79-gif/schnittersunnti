@@ -1,0 +1,7 @@
+{
+  "name": "fck-print-agent",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node agent.mjs", "test": "node agent.mjs --test theke" },
+  "dependencies": { "@supabase/supabase-js": "^2.119.0" }
+}

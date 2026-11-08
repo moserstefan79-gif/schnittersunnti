@@ -11,6 +11,7 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
    - `supabase/migrations/001_schema.sql` – Tabellen, Trigger, Views, RLS
    - `supabase/migrations/002_seed_shifts_2027.sql` – 46 Schichten / 108 Plätze für 16.–18. Juli 2027
    - `supabase/migrations/003_matches.sql` – Tabelle `matches` für die Spiele auf dem Screen (Admins pflegen sie unter `/admin`)
+   - `supabase/migrations/004_order_and_pay.sql` – Order & Pay: Karte 2026 (payfix-Artikelnummern), Tische, Bestellungen, Depot, Druckjobs
 3. **Auth**: Authentication → Providers → Email aktiviert lassen. «Confirm email» nach Wunsch (für den Vereinsgebrauch darf es auch aus sein).
    Unter Authentication → URL Configuration die Site-URL (z.B. `https://www.schnittersunnti.ch`) und `…/helfer` als Redirect eintragen.
 4. **`.env`** aus `.env.example` kopieren, `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` (Publishable Key) eintragen.
@@ -29,6 +30,39 @@ Admins sehen unter `/admin` den vollständigen Plan mit Namen, Telefon und Manns
 ## Schichten anpassen
 
 Direkt in der Tabelle `shifts` (Supabase Table Editor) – `capacity` erhöhen, Zeiten ändern, Posten ergänzen. Die Kapazität wird beim Anmelden datenbankseitig geprüft (kein Überbuchen).
+
+## Order & Pay (Bestellen am Tisch, Twint via Payrexx, Bon-Drucker, Depot)
+
+**Ablauf Gast:** QR am Tisch → `/bestellen/T3` → Karte → Warenkorb → «An Tisch bringen» oder «Selbst abholen» → Payrexx (Twint/Karte) → Statusseite mit Nummer. Depot CHF 2.– pro Becher/Glas wird mitbezahlt.
+
+**Ablauf Betrieb:**
+- `/station/kueche`, `/station/theke`, `/station/bar` – Live-Boards pro Station (Login mit Helferkonto). Positionen abhaken, «Alles bereit», «Geliefert/Abgeholt». Bestellungen > 15 min werden orange.
+- `/station/theke` → Tab **Depot**: Bestellnummer eingeben, Stückzahl, «Bar auszahlen» oder «Auf Twint/Karte» (Teil-Refund via Payrexx). Becher ohne Bestellbezug: nur bar.
+- `/tafel` – Abholtafel für einen Fernseher an der Theke (bereit / in Arbeit).
+- `/admin` – Karte (ausverkauft, Preise, Depot), Tische + QR-Karten als A6-Druck, Online-Umsatz.
+- Bar-/Kartenzahlung direkt an der Theke läuft weiterhin über **payfix (Dinaco)**; gleicher Artikelstamm (Spalte `article_no`), getrennte Umsätze.
+
+**Payrexx einrichten**
+1. Konto auf payrexx.com (Verein als Vertragspartner, Twint aktivieren). Instanzname = Subdomain (`fckirchberg.payrexx.com` → `fckirchberg`).
+2. Unter API-Keys einen Schlüssel erstellen.
+3. Edge Functions deployen und Secrets setzen:
+   ```
+   supabase functions deploy payrexx-create payrexx-webhook payrexx-check payrexx-refund
+   supabase secrets set PAYREXX_INSTANCE=fckirchberg PAYREXX_API_SECRET=...
+   ```
+   `payrexx-webhook` muss ohne JWT erreichbar sein: in `supabase/config.toml` `[functions.payrexx-webhook] verify_jwt = false` (gilt auch für `payrexx-create` und `payrexx-check`, die der anonyme Gast aufruft).
+4. In Payrexx unter Webhooks die URL `https://<projekt>.supabase.co/functions/v1/payrexx-webhook` eintragen (Ereignis: Transaktion).
+5. Testmodus in Payrexx nutzen, bis der erste echte Durchlauf sitzt.
+
+**Bon-Drucker** (`tools/print-agent`): Netzwerkdrucker mit ESC/POS auf Port 9100 (Epson TM-m30/TM-T20, Star mC-Print, viele 80-mm-Geräte). Ein Laptop oder Raspberry Pi im selben Netz führt den Agenten aus:
+```
+cd tools/print-agent && npm install && cp .env.example .env   # URL, Service-Role-Key, Drucker-IPs eintragen
+npm run test       # Testbon
+npm start          # läuft während des Fests
+```
+Pro bezahlte Bestellung druckt jede beteiligte Station ihren Bon (Nummer gross, Tisch/Abholung, Positionen, Bemerkung). `PRINT_GUEST_COPY=theke` druckt zusätzlich einen Gastbon mit Total und Depot. Fehlgeschlagene Drucke bleiben offen und werden alle 5 s erneut versucht.
+
+**Netz am Fest:** eigener Router (4G/5G) mit WLAN für Drucker, Stationen-Tablets und Tafel; Gäste bestellen über ihr Mobilnetz. Druckerfeste IPs vergeben.
 
 ## Deploy (GitHub + Netlify)
 
@@ -50,10 +84,16 @@ Jeder Push auf `main` löst danach automatisch ein Deploy aus.
 src/
   pages/Home.jsx        Landingpage (Hero, Angebot, Geschichte, Verein, Partner)
   pages/Helfer.jsx      Login + Schichtplan + «Meine Schichten»
-  pages/Admin.jsx       Admin-Übersicht, CSV-Export
-  components/           Layout, AuthProvider, AuthForm, Matches (öffentlich), MatchEditor (Admin)
-  lib/supabase.js       Client + Eventdaten (Daten/Zeiten/Kontakt zentral hier)
+  pages/Admin.jsx       Admin-Übersicht, CSV-Export, Spiele, Karte, Tische/QR, Umsatz
+  pages/Bestellen.jsx   Gast: Karte + Warenkorb + Checkout
+  pages/BestellStatus.jsx  Gast: Nummer, Status, Depot
+  pages/Station.jsx     Küche/Theke/Bar-Boards + Depot-Rückgabe
+  pages/Tafel.jsx       Abholtafel
+  components/           Layout, AuthProvider, AuthForm, Matches, MatchEditor, OrderAdmin
+  lib/supabase.js       Client + Eventdaten;  lib/orders.js  Bestell-API
 supabase/migrations/    Schema + Seed
+supabase/functions/     payrexx-create, payrexx-webhook, payrexx-check, payrexx-refund
+tools/print-agent/      Bon-Drucker-Agent (Node, ESC/POS)
 ```
 
 Jahreswechsel: Daten in `src/lib/supabase.js` (EVENT) anpassen, neue Schichten seeden, alte Anmeldungen leeren.
