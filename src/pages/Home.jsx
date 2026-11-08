@@ -10,12 +10,12 @@ const menu = [
 ]
 
 const partners = [
-  { name: 'Niederer', url: 'https://niederer.com/de' },
-  { name: 'Gallo Bau', url: 'https://www.gallobau.ch/' },
-  { name: 'Treska Gerüstbau', url: 'https://www.treska-geruestbau.ch/' },
-  { name: 'Halter', url: 'https://www.halter.ch/' },
-  { name: 'U+F', url: 'https://u-f.ch/' },
-  { name: 'Emmenpark', url: 'https://emmenpark.ch/' },
+  { name: 'Halter', url: 'https://www.halter.ch/', img: '/partner/halter.jpg' },
+  { name: 'Gallo Baugeschäft AG', url: 'https://www.gallobau.ch/', img: '/partner/gallo.jpg' },
+  { name: 'Universal', url: 'https://u-f.ch/', img: '/partner/universal.jpg' },
+  { name: 'Niederer – mobil in immobilien', url: 'https://niederer.com/de', img: '/partner/niederer.jpg' },
+  { name: 'Treska Gerüstbau', url: 'https://www.treska-geruestbau.ch/', img: '/partner/treska.jpg' },
+  { name: 'Kargo68', url: 'https://kargo68.ch/', img: '/partner/kargo68.jpg' },
 ]
 
 function Wheat({ className }) {
@@ -83,6 +83,7 @@ export default function Home() {
             </p>
             <p className="mt-4 text-ink/80 max-w-md">Neu: am Tisch per QR-Code bestellen und mit Twint bezahlen – wir bringen es dir oder du holst es an der Theke ab.</p>
             <p className="mt-4 text-ink/80 max-w-md">Und auf dem Screen: die K.o.-Spiele der Frauen-WM 2027 – <a href="#spiele" className="underline hover:text-orange-deep">was wir zeigen</a>.</p>
+            <a href="/karte-2026.jpg" target="_blank" rel="noreferrer" className="btn btn-ghost mt-6">Karte 2026 ansehen</a>
             <figure className="mt-8 max-w-md">
               <img src="/liegestuhl.jpg" alt="Liegestuhl mit dem Home-of-Football-Logo" loading="lazy" width="1050" height="1400" className="w-full aspect-[3/4] object-cover object-[50%_60%] rounded-2xl" />
               <figcaption className="mt-2 text-sm text-ink/60">Platz nehmen im Home of Football – unsere Liegestühle warten.</figcaption>
@@ -141,9 +142,7 @@ export default function Home() {
             <a href="https://www.fc-kirchberg.ch/" target="_blank" rel="noreferrer" className="btn btn-primary mt-8">Zum Verein</a>
           </div>
           <div className="grid gap-px bg-white/20 border border-white/20 sm:grid-cols-[auto_1fr]">
-            <div className="bg-white p-6 grid place-items-center">
-              <img src="/logo-small.png" alt="" width="200" height="228" className="w-36" loading="lazy" />
-            </div>
+            <img src="/fck-wappen.jpg" alt="Wappen FC Kirchberg BE, gegründet 1924" width="800" height="800" loading="lazy" className="w-full sm:w-56 aspect-square object-cover" />
             <dl className="bg-ink grid grid-cols-2 gap-6 p-6">
               {[['108', 'Schichten'], ['3', 'Festtage'], ['4', 'Länder-Küchen'], ['1924', 'gegründet']].map(([n, l]) => (
                 <div key={l}>
@@ -178,16 +177,16 @@ export default function Home() {
       <section id="partner" className="scroll-mt-20">
         <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
           <h2 className="text-3xl md:text-4xl">Unsere Partner</h2>
-          <ul className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-px bg-line border border-line">
+          <ul className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             {partners.map(p => (
-              <li key={p.name} className="bg-paper">
-                <a href={p.url} target="_blank" rel="noreferrer" className="flex h-24 items-center justify-center px-4 font-display font-bold text-lg text-ink/70 hover:text-orange-deep text-center">
-                  {p.name}
+              <li key={p.name}>
+                <a href={p.url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-2xl ring-2 ring-transparent hover:ring-orange transition-shadow">
+                  <img src={p.img} alt={p.name} width="800" height="800" loading="lazy" className="w-full aspect-square object-cover" />
                 </a>
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-sm text-ink/60">Logos folgen – Partner werden möchten? <a href={`mailto:${EVENT.contact.email}`} className="underline hover:text-orange-deep">Melde dich</a>.</p>
+          <p className="mt-4 text-sm text-ink/60">Partner werden? <a href={`mailto:${EVENT.contact.email}`} className="underline hover:text-orange-deep">Melde dich</a> – Logo auf Website, Karte und Banner im Beizli.</p>
         </div>
       </section>
     </>
