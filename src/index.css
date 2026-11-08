@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  --color-orange: #FF7000;
+  --color-orange-deep: #D45A00;
+  --color-ink: #0E1114;
+  --color-stroh: #F3E4B8;
+  --color-stroh-light: #FAF3DF;
+  --color-rasen: #1F5A36;
+  --color-paper: #FFFFFF;
+  --color-line: rgba(20, 20, 20, 0.14);
+
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-sans: "Figtree", system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+h1, h2, h3, .display {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 96, "wdth" 90;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  font-weight: 700;
+}
+
+.display-wide { font-variation-settings: "opsz" 96, "wdth" 100; }
+.display-narrow { font-variation-settings: "opsz" 96, "wdth" 75; }
+
+:focus-visible {
+  outline: 3px solid var(--color-orange);
+  outline-offset: 3px;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-3 font-semibold rounded-full transition-colors;
+}
+.btn-primary { @apply bg-orange text-ink hover:bg-orange-deep hover:text-white; }
+.btn-dark { @apply bg-ink text-white hover:bg-orange hover:text-ink; }
+.btn-ghost { @apply border border-ink/30 text-ink hover:border-ink; }
+
+.field {
+  @apply w-full rounded-lg border border-ink/25 bg-white px-3.5 py-2.5 text-ink placeholder:text-ink/40 focus:border-orange focus:outline-none focus:ring-2 focus:ring-orange/40;
+}
+
+/* Logo-Punkte als Hintergrundmuster */
+.dots {
+  background-image:
+    radial-gradient(circle at 12% 20%, var(--color-orange) 0 7px, transparent 8px),
+    radial-gradient(circle at 70% 10%, var(--color-ink) 0 4px, transparent 5px),
+    radial-gradient(circle at 88% 70%, var(--color-orange) 0 5px, transparent 6px),
+    radial-gradient(circle at 40% 85%, var(--color-ink) 0 3px, transparent 4px),
+    radial-gradient(circle at 25% 60%, var(--color-orange) 0 3px, transparent 4px);
+  background-size: 420px 420px;
+  background-repeat: repeat;
+}
+
+.hero-rule {
+  background-image: repeating-linear-gradient(90deg, var(--color-orange) 0 24px, transparent 24px 36px);
+  height: 6px;
+}
