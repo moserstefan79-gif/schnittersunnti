@@ -1,6 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Routes, Route } from 'react-router-dom'
+import { DEMO } from './lib/supabase.js'
+import DemoPay from './pages/DemoPay.jsx'
+import DemoBar from './components/DemoBar.jsx'
 import './index.css'
 import Layout from './components/Layout.jsx'
 import Home from './pages/Home.jsx'
@@ -12,10 +15,13 @@ import Station from './pages/Station.jsx'
 import Tafel from './pages/Tafel.jsx'
 import { AuthProvider } from './components/AuthProvider.jsx'
 
+const Router = DEMO ? HashRouter : BrowserRouter
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <Router>
       <AuthProvider>
+        {DEMO && <DemoBar />}
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
@@ -28,8 +34,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/bestellen/:code" element={<Bestellen />} />
           <Route path="/station/:station" element={<Station />} />
           <Route path="/tafel" element={<Tafel />} />
+          <Route path="/demo-pay/:id" element={<DemoPay />} />
         </Routes>
       </AuthProvider>
-    </BrowserRouter>
+    </Router>
   </React.StrictMode>,
 )

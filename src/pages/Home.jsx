@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { EVENT } from '../lib/supabase.js'
+import { EVENT, asset } from '../lib/supabase.js'
 import Matches from '../components/Matches.jsx'
 
 const menu = [
@@ -53,7 +53,7 @@ export default function Home() {
               <a href="#angebot" className="btn btn-ghost text-lg">Was es gibt</a>
             </div>
           </div>
-          <img src="/logo.png" alt="Home of Football – Logo des FC Beizli" width="1000" height="1138"
+          <img src={asset("/logo.png")} alt="Home of Football – Logo des FC Beizli" width="1000" height="1138"
             className="w-[70%] max-w-xs mx-auto md:w-full md:max-w-md drop-shadow-[0_18px_40px_rgba(255,112,0,0.25)]" fetchPriority="high" />
         </div>
 
@@ -83,9 +83,9 @@ export default function Home() {
             </p>
             <p className="mt-4 text-ink/80 max-w-md">Neu: am Tisch per QR-Code bestellen und mit Twint bezahlen – wir bringen es dir oder du holst es an der Theke ab.</p>
             <p className="mt-4 text-ink/80 max-w-md">Und auf dem Screen: die K.o.-Spiele der Frauen-WM 2027 – <a href="#spiele" className="underline hover:text-orange-deep">was wir zeigen</a>.</p>
-            <a href="/karte-2026.jpg" target="_blank" rel="noreferrer" className="btn btn-ghost mt-6">Karte 2026 ansehen</a>
+            <a href={asset("/karte-2026.jpg")} target="_blank" rel="noreferrer" className="btn btn-ghost mt-6">Karte 2026 ansehen</a>
             <figure className="mt-8 max-w-md">
-              <img src="/liegestuhl.jpg" alt="Liegestuhl mit dem Home-of-Football-Logo" loading="lazy" width="1050" height="1400" className="w-full aspect-[3/4] object-cover object-[50%_60%] rounded-2xl" />
+              <img src={asset("/liegestuhl.jpg")} alt="Liegestuhl mit dem Home-of-Football-Logo" loading="lazy" width="1050" height="1400" className="w-full aspect-[3/4] object-cover object-[50%_60%] rounded-2xl" />
               <figcaption className="mt-2 text-sm text-ink/60">Platz nehmen im Home of Football – unsere Liegestühle warten.</figcaption>
             </figure>
           </div>
@@ -142,7 +142,7 @@ export default function Home() {
             <a href="https://www.fc-kirchberg.ch/" target="_blank" rel="noreferrer" className="btn btn-primary mt-8">Zum Verein</a>
           </div>
           <div className="grid gap-px bg-white/20 border border-white/20 sm:grid-cols-[auto_1fr]">
-            <img src="/fck-wappen.jpg" alt="Wappen FC Kirchberg BE, gegründet 1924" width="800" height="800" loading="lazy" className="w-full sm:w-56 aspect-square object-cover" />
+            <img src={asset("/fck-wappen.jpg")} alt="Wappen FC Kirchberg BE, gegründet 1924" width="800" height="800" loading="lazy" className="w-full sm:w-56 aspect-square object-cover" />
             <dl className="bg-ink grid grid-cols-2 gap-6 p-6">
               {[['108', 'Schichten'], ['3', 'Festtage'], ['4', 'Länder-Küchen'], ['1924', 'gegründet']].map(([n, l]) => (
                 <div key={l}>
@@ -181,7 +181,7 @@ export default function Home() {
             {partners.map(p => (
               <li key={p.name}>
                 <a href={p.url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-2xl ring-2 ring-transparent hover:ring-orange transition-shadow">
-                  <img src={p.img} alt={p.name} width="800" height="800" loading="lazy" className="w-full aspect-square object-cover" />
+                  <img src={asset(p.img)} alt={p.name} width="800" height="800" loading="lazy" className="w-full aspect-square object-cover" />
                 </a>
               </li>
             ))}

@@ -1,13 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
+import { mockClient } from './mock.js'
 
 const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+export const DEMO = import.meta.env.VITE_DEMO === '1'
 
-export const supabaseConfigured = Boolean(url && key)
+export const supabaseConfigured = DEMO || Boolean(url && key)
 
-export const supabase = supabaseConfigured
-  ? createClient(url, key)
-  : null
+export const supabase = DEMO ? mockClient : (supabaseConfigured ? createClient(url, key) : null)
+
+// Bilder relativ zur Basis (für Mockup-Hosting unter Unterpfad)
+export const asset = (p) => import.meta.env.BASE_URL.replace(/\/$/, '') + '/' + p.replace(/^\//, '')
 
 export const EVENT = {
   year: 2027,

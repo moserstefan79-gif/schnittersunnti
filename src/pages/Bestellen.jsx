@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { supabaseConfigured } from '../lib/supabase.js'
+import { supabaseConfigured, asset } from '../lib/supabase.js'
 import { fetchMenu, fetchTable, placeOrder, startPayment, chf, remember, recall } from '../lib/orders.js'
 
 export default function Bestellen() {
@@ -127,7 +127,7 @@ export function Shell({ title, table, children }) {
   return (
     <div className="mx-auto max-w-lg px-4 py-6 pb-28">
       <div className="flex items-center gap-3">
-        <img src="/logo-small.png" alt="" className="h-12 w-auto" />
+        <img src={asset("/logo-small.png")} alt="" className="h-12 w-auto" />
         <div>
           <p className="text-sm text-ink/60">Home of Football · FC Beizli</p>
           {title && <h1 className="text-2xl leading-none">{title}</h1>}

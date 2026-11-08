@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider.jsx'
 import AuthForm from '../components/AuthForm.jsx'
-import { supabase, supabaseConfigured, fmtTime, fmtDay, EVENT } from '../lib/supabase.js'
+import { supabase, supabaseConfigured, fmtTime, fmtDay, EVENT, asset } from '../lib/supabase.js'
 
 const areaOrder = ['Aufbau', 'Theke', 'Küche', 'Service', 'Bar', 'Kasse', 'Abbau']
 
@@ -32,7 +32,7 @@ function Section({ title, lead, children, aside }) {
     <div className="mx-auto max-w-6xl px-4 py-12 md:py-16">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex items-end gap-5">
-          <img src="/logo-small.png" alt="" width="200" height="228" className="hidden sm:block h-24 w-auto" />
+          <img src={asset("/logo-small.png")} alt="" width="200" height="228" className="hidden sm:block h-24 w-auto" />
           <div>
           <p className="font-display font-semibold text-orange-deep text-lg">Home of Football · Schnittersunnti {EVENT.year}</p>
           <h1 className="text-4xl md:text-6xl mt-1">{title}</h1>

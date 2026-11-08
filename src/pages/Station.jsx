@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link, Navigate } from 'react-router-dom'
-import { supabase, supabaseConfigured } from '../lib/supabase.js'
+import { supabase, supabaseConfigured, asset } from '../lib/supabase.js'
 import { useAuth } from '../components/AuthProvider.jsx'
 import AuthForm from '../components/AuthForm.jsx'
 import { chf } from '../lib/orders.js'
@@ -63,7 +63,7 @@ function Board({ station, userId }) {
   return (
     <div className="min-h-screen bg-ink text-white">
       <header className="sticky top-0 z-10 bg-ink/95 backdrop-blur border-b border-white/10 px-4 h-14 flex items-center gap-4">
-        <img src="/logo-small.png" alt="" className="h-9 w-auto rounded bg-white p-0.5" />
+        <img src={asset("/logo-small.png")} alt="" className="h-9 w-auto rounded bg-white p-0.5" />
         <h1 className="font-display font-bold text-xl">{STATIONS[station]}</h1>
         <nav className="ml-auto flex gap-1 text-sm">
           {Object.entries(STATIONS).map(([k, v]) => <Link key={k} to={`/station/${k}`} className={`px-3 py-1.5 rounded-full ${k === station ? 'bg-orange text-ink font-semibold' : 'text-white/60 hover:text-white'}`}>{v}</Link>)}

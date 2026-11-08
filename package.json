@@ -18,6 +18,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:demo": "VITE_DEMO=1 vite build --base ./ --outDir dist-demo"
   }
 }

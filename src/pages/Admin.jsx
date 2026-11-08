@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider.jsx'
 import { supabase, supabaseConfigured, fmtTime, fmtDay } from '../lib/supabase.js'
 import MatchEditor from '../components/MatchEditor.jsx'
@@ -58,7 +58,7 @@ export default function Admin() {
       <div className="mt-6 flex flex-wrap gap-2 text-sm">
         <span className="text-ink/60 self-center">Betrieb am Fest:</span>
         {[['/station/kueche', 'Küche'], ['/station/theke', 'Theke & Depot'], ['/station/bar', 'Brasil-Bar'], ['/tafel', 'Abholtafel'], ['/bestellen', 'Gast-Ansicht']].map(([to, l]) => (
-          <a key={to} href={to} target="_blank" rel="noreferrer" className="btn btn-ghost !py-1.5">{l}</a>
+          <Link key={to} to={to} target="_blank" className="btn btn-ghost !py-1.5">{l}</Link>
         ))}
       </div>
 

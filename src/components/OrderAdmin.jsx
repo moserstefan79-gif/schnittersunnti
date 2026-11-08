@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
-import { supabase } from '../lib/supabase.js'
+import { supabase, asset } from '../lib/supabase.js'
 import { chf } from '../lib/orders.js'
 
 export default function OrderAdmin() {
@@ -66,7 +66,7 @@ function TablesAdmin() {
     const cards = await Promise.all(tables.filter(t => t.active).map(async t => {
       const url = `${base}/bestellen/${t.code}`
       const svg = await QRCode.toString(url, { type: 'svg', margin: 1, width: 300, color: { dark: '#0E1114' } })
-      return `<div class="card"><img src="/logo-small.png"><h1>${t.label}</h1>${svg}<p>Scannen · bestellen · Twint</p><small>${url.replace(/^https?:\/\//, '')}</small></div>`
+      return `<div class="card"><img src={asset("/logo-small.png")}><h1>${t.label}</h1>${svg}<p>Scannen · bestellen · Twint</p><small>${url.replace(/^https?:\/\//, '')}</small></div>`
     }))
     const w = window.open('', '_blank')
     w.document.write(`<!doctype html><html><head><title>QR-Karten</title><style>

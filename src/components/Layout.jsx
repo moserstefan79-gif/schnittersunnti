@@ -1,12 +1,12 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useAuth } from './AuthProvider.jsx'
-import { supabase, EVENT } from '../lib/supabase.js'
+import { supabase, EVENT, asset } from '../lib/supabase.js'
 
 function Logo() {
   return (
     <Link to="/" className="flex items-center gap-3 group" aria-label="Startseite">
-      <img src="/logo-small.png" alt="" width="200" height="228" className="h-11 w-auto" />
+      <img src={asset("/logo-small.png")} alt="" width="200" height="228" className="h-11 w-auto" />
       <span className="font-display font-bold text-lg leading-none">Home of Football<span className="block text-xs font-sans font-medium text-ink/60 mt-0.5">FC Beizli · Schnittersunnti Kirchberg</span></span>
     </Link>
   )
@@ -66,7 +66,7 @@ export default function Layout() {
         <div className="hero-rule" />
         <div className="mx-auto max-w-6xl px-4 py-12 grid gap-10 md:grid-cols-3">
           <div className="flex gap-5 items-start">
-            <div className="shrink-0 rounded-xl bg-white p-2"><img src="/logo-small.png" alt="Home of Football" width="200" height="228" className="h-20 w-auto" loading="lazy" /></div>
+            <div className="shrink-0 rounded-xl bg-white p-2"><img src={asset("/logo-small.png")} alt="Home of Football" width="200" height="228" className="h-20 w-auto" loading="lazy" /></div>
             <div>
               <p className="font-display font-bold text-2xl leading-tight">Home of Football</p>
               <p className="mt-2 text-white/70 max-w-xs">Das FC Beizli des FC Kirchberg am Schnittersunnti – seit Jahrzehnten mitten im Dorf.</p>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase, supabaseConfigured } from '../lib/supabase.js'
+import { supabase, supabaseConfigured, asset } from '../lib/supabase.js'
 
 // Abholtafel – Vollbild auf einem Fernseher/Tablet an der Theke
 export default function Tafel() {
@@ -32,7 +32,7 @@ export default function Tafel() {
         <ul className="mt-6 flex flex-wrap gap-3">
           {prep.map(r => <li key={r.number} className="font-display font-bold text-5xl tabular-nums border-2 border-white/30 rounded-2xl px-5 py-2">{r.number}</li>)}
         </ul>
-        <img src="/logo-small.png" alt="" className="absolute bottom-6 right-6 h-20 bg-white rounded-xl p-1" />
+        <img src={asset("/logo-small.png")} alt="" className="absolute bottom-6 right-6 h-20 bg-white rounded-xl p-1" />
       </section>
     </div>
   )
