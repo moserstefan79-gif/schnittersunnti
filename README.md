@@ -9,7 +9,7 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
 1. **Supabase-Projekt anlegen** (Region Zürich `eu-central-2`).
 2. **Migrationen ausführen** im SQL-Editor, in dieser Reihenfolge:
    - `supabase/migrations/001_schema.sql` – Tabellen, Trigger, Views, RLS
-   - `supabase/migrations/002_seed_shifts_2027.sql` – 42 Schichten / 102 Plätze für 16.–18. Juli 2027
+   - `supabase/migrations/002_seed_shifts_2027.sql` – 42 Schichten / 110 Plätze für 16.–18. Juli 2027
    - `supabase/migrations/003_matches.sql` – Tabelle `matches` für die Spiele auf dem Screen (Admins pflegen sie unter `/admin`)
    - `supabase/migrations/004_order_and_pay.sql` – Order & Pay: Karte 2026 (payfix-Artikelnummern), Tische, Bestellungen, Depot, Druckjobs
 3. **Auth**: Authentication → Providers → Email aktiviert lassen. «Confirm email» nach Wunsch (für den Vereinsgebrauch darf es auch aus sein).

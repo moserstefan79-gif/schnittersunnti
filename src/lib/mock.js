@@ -20,26 +20,21 @@ const db = {
 
 // Schichten wie im Seed
 const blocks = [
-  ['2027-07-16', '14:00', '18:00', 'aufbau'],
-  ['2027-07-16', '18:30', '22:30', 'b'],
-  ['2027-07-16', '22:00', '02:30', 'b'],
-  ['2027-07-17', '16:30', '20:30', 'b'],
-  ['2027-07-17', '20:00', '00:00', 'b'],
-  ['2027-07-17', '23:30', '03:30', 'b'],
-  ['2027-07-18', '08:30', '12:30', 'bm'],
-  ['2027-07-18', '12:00', '15:30', 'b'],
-  ['2027-07-18', '15:00', '18:30', 'b'],
-  ['2027-07-18', '18:00', '21:00', 'abbau_so'],
-  ['2027-07-19', '08:00', '12:00', 'abbau'],
+  ['2027-07-16', '14:00', '18:00', [['Aufbau', 'Zelt, Bänke, Theke und Technik aufstellen', 5]]],
+  ['2027-07-16', '18:30', '22:30', [['Theke', 'Getränkeausgabe im Biergarten', 3], ['Küche', 'Älplermagronen, Fleischkäse, Fish & Chips', 2], ['Service', 'Bringen an die Tische, Abräumen, Becher', 3], ['Bar', 'Brasil-Bar – Drinks & Cocktails', 3], ['Kasse', 'Kasse & Depot', 2]]],
+  ['2027-07-16', '22:00', '02:30', [['Theke', 'Getränkeausgabe im Biergarten', 3], ['Küche', 'Älplermagronen, Fleischkäse, Fish & Chips', 2], ['Service', 'Bringen an die Tische, Abräumen, Becher', 3], ['Bar', 'Brasil-Bar – Drinks & Cocktails', 3], ['Kasse', 'Kasse & Depot', 1]]],
+  ['2027-07-17', '16:30', '20:30', [['Theke', 'Getränkeausgabe im Biergarten', 3], ['Küche', 'Älplermagronen, Fleischkäse, Fish & Chips', 3], ['Service', 'Bringen an die Tische, Abräumen, Becher', 3], ['Bar', 'Brasil-Bar – Drinks & Cocktails', 2], ['Kasse', 'Kasse & Depot', 2]]],
+  ['2027-07-17', '20:00', '00:00', [['Theke', 'Getränkeausgabe im Biergarten', 4], ['Küche', 'Älplermagronen, Fleischkäse, Fish & Chips', 3], ['Service', 'Bringen an die Tische, Abräumen, Becher', 4], ['Bar', 'Brasil-Bar – Drinks & Cocktails', 4], ['Kasse', 'Kasse & Depot', 2]]],
+  ['2027-07-17', '23:30', '03:30', [['Theke', 'Getränkeausgabe im Biergarten', 3], ['Küche', 'Älplermagronen, Fleischkäse, Fish & Chips', 2], ['Service', 'Bringen an die Tische, Abräumen, Becher', 3], ['Bar', 'Brasil-Bar – Drinks & Cocktails', 4], ['Kasse', 'Kasse & Depot', 1]]],
+  ['2027-07-18', '08:30', '12:30', [['Theke', 'Kaffee & Getränkeausgabe', 2], ['Küche', 'Mittagsbetrieb vorbereiten', 3], ['Service', 'Bringen an die Tische, Abräumen, Becher', 2], ['Kasse', 'Kasse & Depot', 1]]],
+  ['2027-07-18', '12:00', '15:30', [['Theke', 'Getränkeausgabe im Biergarten', 3], ['Küche', 'Älplermagronen, Fleischkäse, Fish & Chips', 3], ['Service', 'Bringen an die Tische, Abräumen, Becher', 3], ['Bar', 'Brasil-Bar – Drinks & Cocktails', 1], ['Kasse', 'Kasse & Depot', 1]]],
+  ['2027-07-18', '15:00', '18:30', [['Theke', 'Getränkeausgabe im Biergarten', 2], ['Küche', 'Älplermagronen, Fleischkäse, Fish & Chips', 2], ['Service', 'Bringen an die Tische, Abräumen, Becher', 2], ['Bar', 'Brasil-Bar – Drinks & Cocktails', 1], ['Kasse', 'Kasse & Depot', 1]]],
+  ['2027-07-18', '18:00', '21:00', [['Abbau', 'Leergut, Kühlmaterial und Becher-Boxen zurückstellen, Küche reinigen', 5]]],
+  ['2027-07-19', '08:00', '12:00', [['Abbau', 'Zelte und Mobiliar abbauen, Materialrückgabe', 5]]],
 ]
-const posts = {
-  b: [['Theke', 'Getränkeausgabe im Biergarten', 3], ['Küche', 'Älplermagronen, Fleischkäse, Fish & Chips', 2], ['Service', 'Bedienung in der Festwirtschaft', 3], ['Bar', 'Brasil-Bar – Drinks & Cocktails', 2], ['Kasse', 'Kasse & Jetons', 1]],
-  bm: [['Theke', 'Kaffee & Getränkeausgabe', 3], ['Küche', 'Mittagsbetrieb vorbereiten', 3], ['Service', 'Bedienung in der Festwirtschaft', 3], ['Kasse', 'Kasse & Jetons', 1]],
-  aufbau: [['Aufbau', 'Zelt, Bänke, Theke und Technik aufstellen', 5]], abbau_so: [['Abbau', 'Leergut, Kühlmaterial und Becher-Boxen zurückstellen, Küche reinigen', 5]], abbau: [['Abbau', 'Zelte und Mobiliar abbauen, Materialrückgabe', 5]],
-}
-for (const [d, s, e, k] of blocks) {
+for (const [d, s, e, posts] of blocks) {
   const end = e > s ? d : new Date(new Date(d + 'T12:00:00Z').getTime() + 864e5).toISOString().slice(0, 10)
-  for (const [area, description, capacity] of posts[k])
+  for (const [area, description, capacity] of posts)
     db.shifts.push({ id: uid(), day: d, starts_at: `${d}T${s}:00+02:00`, ends_at: `${end}T${e}:00+02:00`, area, description, capacity })
 }
 // ein paar Anmeldungen
