@@ -129,7 +129,7 @@ function ShiftBoard({ profile, userId }) {
       title={`Hoi ${profile?.full_name?.split(' ')[0] || ''}`}
       lead={wishMode
         ? `Wunschphase: Merke dir die Schichten, die dir passen – mehrere sind willkommen. ${note} Bisher ${wishes} Wünsche für ${total} Plätze.`
-        : `${taken} von ${total} Plätzen sind besetzt. Wähle eine oder mehrere Schichten – du kannst dich bis am ${EVENT.signupDeadline} jederzeit wieder abmelden.`}
+        : `${taken} von ${total} Plätzen sind besetzt. Wähle eine oder mehrere Schichten – eine zugeteilte Schicht ist verbindlich; wenn du verhindert bist, melde dich beim OK.`}
       aside={profile?.is_admin && <Link to="/admin" className="btn btn-ghost">Admin-Übersicht</Link>}
     >
       {/* Meine Schichten */}
@@ -145,7 +145,9 @@ function ShiftBoard({ profile, userId }) {
                 <span>{fmtDay(s.day)}</span>
                 <span className="text-white/70">{fmtTime(s.starts_at)} – {fmtTime(s.ends_at)}</span>
                 <span className={`mt-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold ${s.mine_status === 'confirmed' ? 'bg-rasen text-white' : 'bg-orange text-ink'}`}>{s.mine_status === 'confirmed' ? 'Zugeteilt' : 'Wunsch'}</span>
-                <button onClick={() => toggle(s)} disabled={busyId === s.id} className="mt-2 self-start text-sm underline text-white/70 hover:text-white">{s.mine_status === 'confirmed' ? 'Abmelden' : 'Wunsch entfernen'}</button>
+                {s.mine_status === 'confirmed'
+                  ? <a href={`mailto:${EVENT.contact.email}?subject=Schicht%20abgeben%20${encodeURIComponent(s.area + ' ' + fmtDay(s.day) + ' ' + fmtTime(s.starts_at))}`} className="mt-2 self-start text-xs text-white/60 hover:text-white underline">Verhindert? OK anfragen</a>
+                  : <button onClick={() => toggle(s)} disabled={busyId === s.id} className="mt-2 self-start text-sm underline text-white/70 hover:text-white">Wunsch entfernen</button>}
               </li>
             ))}
           </ul>
@@ -195,10 +197,12 @@ function ShiftCard({ s, wishMode, busy, onToggle }) {
       <div className="h-2 rounded-full bg-ink/10 overflow-hidden" aria-hidden="true">
         <div className={`h-full ${!wishMode && s.free <= 0 ? 'bg-rasen' : 'bg-orange'}`} style={{ width: `${pct}%` }} />
       </div>
-      <button onClick={onToggle} disabled={busy || full}
-        className={`btn !py-2 text-sm self-start ${s.mine ? 'btn-ghost' : full ? 'bg-ink/10 text-ink/50 cursor-not-allowed' : 'btn-dark'}`}>
-        {busy ? '…' : s.mine ? (s.mine_status === 'confirmed' ? 'Abmelden' : 'Wunsch entfernen') : full ? 'Besetzt' : wishMode ? 'Wunschschicht' : 'Ich übernehme'}
-      </button>
+      {s.mine_status === 'confirmed'
+        ? <span className="self-start rounded-full bg-rasen text-white px-3 py-1 text-sm font-semibold">Dir zugeteilt</span>
+        : <button onClick={onToggle} disabled={busy || full}
+            className={`btn !py-2 text-sm self-start ${s.mine ? 'btn-ghost' : full ? 'bg-ink/10 text-ink/50 cursor-not-allowed' : 'btn-dark'}`}>
+            {busy ? '…' : s.mine ? 'Wunsch entfernen' : full ? 'Besetzt' : wishMode ? 'Wunschschicht' : 'Ich übernehme'}
+          </button>}
     </li>
   )
 }

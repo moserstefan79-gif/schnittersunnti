@@ -68,3 +68,8 @@ grant execute on function public.assign_wishes() to authenticated;
 -- Preise 2027 (Vorstandsbeschluss): Fish & Chips 18.–, Bier und Softgetränke +0.50
 update public.menu_items set price_chf = 18.00 where article_no = 103;
 update public.menu_items set price_chf = price_chf + 0.50 where article_no in (301, 302, 401, 402, 403, 404, 405);
+
+-- Zugeteilte Schichten kann nur der Admin lösen; Wünsche darf der Helfer selbst entfernen
+drop policy "signups: own delete" on public.shift_signups;
+create policy "signups: own delete" on public.shift_signups for delete to authenticated
+  using ((user_id = auth.uid() and status = 'wish') or public.is_admin());
