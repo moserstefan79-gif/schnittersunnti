@@ -127,3 +127,8 @@ create policy "signups: admin insert" on public.shift_signups for insert to auth
 
 grant usage on schema public to anon, authenticated;
 grant select on public.shift_overview, public.shift_roster to authenticated;
+
+-- Härtung (Supabase-Advisor): Trigger-Funktionen nicht über die API aufrufbar
+revoke execute on function public.handle_new_user() from anon, authenticated, public;
+revoke execute on function public.check_shift_capacity() from anon, authenticated, public;
+revoke execute on function public.is_admin() from anon, public;

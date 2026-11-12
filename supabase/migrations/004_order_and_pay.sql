@@ -276,3 +276,10 @@ insert into public.tables (code, label, zone) values
   ('T1', 'Tisch 1', 'Festzelt'), ('T2', 'Tisch 2', 'Festzelt'), ('T3', 'Tisch 3', 'Festzelt'),
   ('T4', 'Tisch 4', 'Festzelt'), ('T5', 'Tisch 5', 'Festzelt'), ('T6', 'Tisch 6', 'Festzelt'),
   ('G1', 'Biergarten 1', 'Biergarten'), ('G2', 'Biergarten 2', 'Biergarten'), ('G3', 'Biergarten 3', 'Biergarten');
+
+-- Härtung (Supabase-Advisor)
+revoke execute on function public.on_order_paid() from anon, authenticated, public;
+revoke execute on function public.on_deposit_return() from anon, authenticated, public;
+revoke execute on function public.recalc_order_total() from anon, authenticated, public;
+revoke execute on function public.place_order(public.fulfillment, text, text, text, jsonb) from public;
+revoke execute on function public.get_order(uuid, uuid) from public;

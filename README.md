@@ -6,7 +6,7 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
 
 ## Setup
 
-1. **Supabase-Projekt anlegen** (Region Zürich `eu-central-2`).
+1. **Supabase-Projekt**: `schnittersunnti` (Ref `etvuxfgvhrojfthvkcte`, Region Zürich) – Migrationen 001–004 sind eingespielt (Stand 12.11.2026).
 2. **Migrationen ausführen** im SQL-Editor, in dieser Reihenfolge:
    - `supabase/migrations/001_schema.sql` – Tabellen, Trigger, Views, RLS
    - `supabase/migrations/002_seed_shifts_2027.sql` – 42 Schichten / 107 Plätze für 16.–18. Juli 2027
