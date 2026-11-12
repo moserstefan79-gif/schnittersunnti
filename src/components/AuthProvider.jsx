@@ -1,12 +1,13 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase.js'
 
-const AuthCtx = createContext({ session: null, profile: null, loading: true, refreshProfile: () => {} })
+const AuthCtx = createContext({ session: null, profile: null, loading: true, recovery: false, setRecovery: () => {}, refreshProfile: () => {} })
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(Boolean(supabase))
+  const [recovery, setRecovery] = useState(false)   // Nutzer kam über «Passwort zurücksetzen»-Link
 
   async function loadProfile(s) {
     if (!supabase || !s?.user) { setProfile(null); return }
@@ -20,7 +21,8 @@ export function AuthProvider({ children }) {
       setSession(data.session)
       loadProfile(data.session).finally(() => setLoading(false))
     })
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event === 'PASSWORD_RECOVERY') setRecovery(true)
       setSession(s)
       loadProfile(s)
     })
@@ -28,7 +30,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   return (
-    <AuthCtx.Provider value={{ session, profile, loading, refreshProfile: () => loadProfile(session) }}>
+    <AuthCtx.Provider value={{ session, profile, loading, recovery, setRecovery, refreshProfile: () => loadProfile(session) }}>
       {children}
     </AuthCtx.Provider>
   )

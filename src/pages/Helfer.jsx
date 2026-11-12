@@ -7,7 +7,7 @@ import { supabase, supabaseConfigured, fmtTime, fmtDay, EVENT, asset } from '../
 const areaOrder = ['Aufbau', 'Theke', 'Küche', 'Service', 'Bar', 'Kasse', 'Abbau']
 
 export default function Helfer() {
-  const { session, profile, loading } = useAuth()
+  const { session, profile, loading, recovery, setRecovery } = useAuth()
 
   if (!supabaseConfigured) {
     return (
@@ -33,7 +33,26 @@ export default function Helfer() {
       </Section>
     )
   }
+  if (recovery) return <Section title="Neues Passwort" lead="Wähle ein neues Passwort für deinen Helfer-Login."><NewPassword onDone={() => setRecovery(false)} /></Section>
   return <ShiftBoard profile={profile} userId={session.user.id} />
+}
+
+function NewPassword({ onDone }) {
+  const [pw, setPw] = useState('')
+  const [msg, setMsg] = useState(null)
+  async function submit(e) {
+    e.preventDefault()
+    const { error } = await supabase.auth.updateUser({ password: pw })
+    if (error) setMsg(error.message); else onDone()
+  }
+  return (
+    <form onSubmit={submit} className="max-w-md flex flex-col gap-4">
+      <label className="block"><span className="text-sm font-medium">Neues Passwort (mindestens 8 Zeichen)</span>
+        <input required type="password" minLength={8} className="field mt-1" value={pw} onChange={e => setPw(e.target.value)} autoComplete="new-password" /></label>
+      {msg && <p className="rounded-lg bg-orange/15 text-orange-deep px-4 py-3 text-sm">{msg}</p>}
+      <button className="btn btn-dark self-start">Passwort speichern</button>
+    </form>
+  )
 }
 
 function Section({ title, lead, children, aside }) {
