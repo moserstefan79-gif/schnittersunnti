@@ -40,7 +40,12 @@ export default function Bestellen() {
     } catch (e) { setErr(e.message); setBusy(false) }
   }
 
-  if (!supabaseConfigured) return <Shell><p className="text-ink/60">Bestellsystem ist noch nicht angeschlossen.</p></Shell>
+  if (!supabaseConfigured) return (
+    <Shell title="Bestellen & bezahlen">
+      <p className="text-ink/75">Am Schnittersunnti 2027 bestellst du hier per QR-Code vom Tisch aus und bezahlst mit Twint oder Karte. Das Bestellsystem geht kurz vor dem Fest online.</p>
+      <a href={asset('/karte-2026.jpg')} target="_blank" rel="noreferrer" className="btn btn-ghost mt-6">Karte 2026 ansehen</a>
+    </Shell>
+  )
 
   if (step === 'checkout') {
     return (

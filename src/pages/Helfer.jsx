@@ -11,8 +11,17 @@ export default function Helfer() {
 
   if (!supabaseConfigured) {
     return (
-      <Section title="Helfereinsatz">
-        <p className="text-ink/70">Die Schichtverwaltung ist noch nicht angeschlossen (Supabase-Zugangsdaten fehlen in <code>.env</code>).</p>
+      <Section title="Helfereinsatz" lead="Die Schichtanmeldung öffnet im Januar 2027. Bis dahin: Mannschaft informieren, Wochenende freihalten.">
+        <div className="grid gap-6 md:grid-cols-3">
+          {EVENT.days.map(d => (
+            <div key={d.key} className="border border-line p-5">
+              <p className="font-display font-bold text-2xl">{d.label}</p>
+              <p className="text-ink/60">{d.date} {EVENT.year}</p>
+              <p className="font-display text-orange-deep text-xl mt-3">{d.hours}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-8 text-ink/75 max-w-2xl">Rund 108 Schichten in Theke, Küche, Service, Bar und Kasse – plus Aufbau am Freitag und Abbau am Montag. Du wählst deine Schicht künftig hier selbst, mit eigenem Login. Fragen vorab an <a href={`mailto:${EVENT.contact.email}`} className="underline hover:text-orange-deep">{EVENT.contact.email}</a>.</p>
       </Section>
     )
   }
