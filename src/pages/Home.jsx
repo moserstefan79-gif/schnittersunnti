@@ -3,10 +3,10 @@ import { EVENT, asset } from '../lib/supabase.js'
 import Matches from '../components/Matches.jsx'
 
 const menu = [
-  { land: 'Essen', dish: 'Fish & Chips, Älplermagronen, Fleischkäse im Mütschli', note: 'Drei Länder, eine Küche – ab CHF 9.–' },
-  { land: 'Bierschenke', dish: 'Bier im Chübeli & Brezel', note: 'Auch alkoholfrei. Depot CHF 2.– auf den Becher.' },
-  { land: 'Wein', dish: 'Legio Julius – weiss, rosé, rot', note: 'Glas 1 dl CHF 5.–, Flasche CHF 35.–' },
-  { land: 'Brasil-Bar', dish: 'Batida de Coco & Ipanema', note: 'Mit oder ohne Alkohol, CHF 8.–/10.–' },
+  { land: 'England', claim: 'Mutterland des Fussballs', dish: 'Fish & Chips', note: 'Knusprig aus der Fritteuse, wie im Pub an der Stamford Bridge. Unser Bestseller.' },
+  { land: 'Schweiz', claim: 'Heimat der FIFA – und des FCK', dish: 'Älplermagronen mit Apfelmus', note: 'Das Heimspiel auf dem Teller: Käse, Magronen, Zwiebeln, Apfelmus. Vegetarisch.' },
+  { land: 'Deutschland', claim: 'Viermal Weltmeister', dish: 'Fleischkäse im Mütschli & Brezel', note: 'Dazu Bier im Chübeli aus der Bierschenke – auch alkoholfrei.' },
+  { land: 'Brasilien', claim: 'Rekordweltmeister & Gastgeber der Frauen-WM 2027', dish: 'Batida de Coco & Ipanema', note: 'An der Brasil-Bar, mit oder ohne Alkohol. Copacabana-Stimmung bis spät.' },
 ]
 
 const partners = [
@@ -75,11 +75,11 @@ export default function Home() {
       <section id="angebot" className="scroll-mt-20 bg-stroh-light">
         <div className="mx-auto max-w-6xl px-4 py-16 md:py-24 grid gap-10 md:grid-cols-[1fr_1.4fr]">
           <div>
-            <h2 className="text-4xl md:text-5xl">Vier Länder,<br />ein Beizli</h2>
+            <h2 className="text-4xl md:text-5xl">Vier grosse<br />Fussballnationen,<br />ein Beizli</h2>
             <p className="mt-6 text-ink/80 max-w-md">
-              Unser Areal an der Schulhausstrasse wird am Schnittersunnti zum «Home of Football»:
-              Biergarten, Festwirtschaft und Bar – mit Küche aus vier Fussballnationen.
-              Ob mit der Clique oder zum Leutetreffen: Hier ist Leben drin.
+              England, Schweiz, Deutschland, Brasilien: Jede Nation bringt ihr Gericht oder ihren Drink mit.
+              Unser Areal an der Schulhausstrasse wird so zum «Home of Football» – Festwirtschaft, Biergarten und Bar unter einem Dach.
+              Dazu Wein von Legio Julius und eine alkoholfreie Auswahl für alle.
             </p>
             <p className="mt-4 text-ink/80 max-w-md">Neu: am Tisch per QR-Code bestellen und mit Twint bezahlen – wir bringen es dir oder du holst es an der Theke ab.</p>
             <p className="mt-4 text-ink/80 max-w-md">Und auf dem Screen: die K.o.-Spiele der Frauen-WM 2027 – <a href="#spiele" className="underline hover:text-orange-deep">was wir zeigen</a>.</p>
@@ -92,8 +92,9 @@ export default function Home() {
           <ul className="grid gap-px bg-line border border-line sm:grid-cols-2">
             {menu.map(m => (
               <li key={m.dish} className="bg-stroh-light p-6">
-                <p className="text-sm font-medium text-orange-deep">{m.land}</p>
-                <p className="font-display font-bold text-2xl mt-1 leading-tight">{m.dish}</p>
+                <p className="font-display font-bold text-xl text-orange-deep leading-none">{m.land}</p>
+                <p className="text-sm text-ink/60 mt-1">{m.claim}</p>
+                <p className="font-display font-bold text-2xl mt-4 leading-tight">{m.dish}</p>
                 <p className="mt-3 text-ink/70">{m.note}</p>
               </li>
             ))}
