@@ -33,12 +33,11 @@ Direkt in der Tabelle `shifts` (Supabase Table Editor) – `capacity` erhöhen, 
 
 ## Order & Pay (Bestellen am Tisch, Twint via Payrexx, Bon-Drucker, Depot)
 
-**Ablauf Gast:** QR am Tisch → `/bestellen/T3` → Karte → Warenkorb → «An Tisch bringen» oder «Selbst abholen» → Payrexx (Twint/Karte) → Statusseite mit Nummer. Depot CHF 2.– pro Becher/Glas wird mitbezahlt.
+**Ablauf Gast:** QR am Tisch → `/bestellen/T3` → Karte → Warenkorb → Payrexx (Twint/Karte) → Statusseite mit Bestellnummer. Alles wird an den Tisch gebracht (keine Abholung). Depot CHF 2.– pro Becher/Glas wird mitbezahlt.
 
 **Ablauf Betrieb:**
-- `/station/kueche`, `/station/theke`, `/station/bar` – Live-Boards pro Station (Login mit Helferkonto). Positionen abhaken, «Alles bereit», «Geliefert/Abgeholt». Bestellungen > 15 min werden orange.
+- `/station/kueche`, `/station/theke`, `/station/bar` – Live-Boards pro Station (Login mit Helferkonto). Positionen abhaken, «Alles bereit», Springer tippt «Geliefert». Bestellungen > 15 min werden orange.
 - `/station/theke` → Tab **Depot**: Bestellnummer eingeben, Stückzahl, «Bar auszahlen» oder «Auf Twint/Karte» (Teil-Refund via Payrexx). Becher ohne Bestellbezug: nur bar.
-- `/tafel` – Abholtafel für einen Fernseher an der Theke (bereit / in Arbeit).
 - `/admin` – Karte (ausverkauft, Preise, Depot), Tische + QR-Karten als A6-Druck, Online-Umsatz.
 - Bar-/Kartenzahlung direkt an der Theke läuft weiterhin über **payfix (Dinaco)**; gleicher Artikelstamm (Spalte `article_no`), getrennte Umsätze.
 
@@ -88,7 +87,6 @@ src/
   pages/Bestellen.jsx   Gast: Karte + Warenkorb + Checkout
   pages/BestellStatus.jsx  Gast: Nummer, Status, Depot
   pages/Station.jsx     Küche/Theke/Bar-Boards + Depot-Rückgabe
-  pages/Tafel.jsx       Abholtafel
   components/           Layout, AuthProvider, AuthForm, Matches, MatchEditor, OrderAdmin
   lib/supabase.js       Client + Eventdaten;  lib/orders.js  Bestell-API
 supabase/migrations/    Schema + Seed

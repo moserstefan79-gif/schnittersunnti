@@ -53,7 +53,6 @@ db.matches = [
 ]
 
 db.tables = [
-  { code: 'ABHOLEN', label: 'Abholung an der Theke', zone: 'Theke', delivery_allowed: false, active: true },
   ...[1, 2, 3, 4, 5, 6].map(n => ({ code: `T${n}`, label: `Tisch ${n}`, zone: 'Festzelt', delivery_allowed: true, active: true })),
   ...[1, 2, 3].map(n => ({ code: `G${n}`, label: `Biergarten ${n}`, zone: 'Biergarten', delivery_allowed: true, active: true })),
 ]

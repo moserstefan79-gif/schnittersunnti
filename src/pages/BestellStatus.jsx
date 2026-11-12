@@ -8,7 +8,7 @@ const texts = {
   open: ['Zahlung ausstehend', 'Die Bestellung ist noch nicht bezahlt.'],
   paid: ['Bezahlt – wird vorbereitet', 'Danke! Deine Bestellung ist in der Küche bzw. an der Bar.'],
   in_progress: ['In Arbeit', 'Gleich fertig.'],
-  ready: ['Bereit', 'Deine Nummer leuchtet auf der Tafel – jetzt an der Theke abholen.'],
+  ready: ['Unterwegs', 'Deine Bestellung ist fertig und kommt gleich an den Tisch.'],
   delivered: ['Serviert', 'En Guete und Prost!'],
   cancelled: ['Storniert', 'Diese Bestellung wurde storniert.'],
 }
@@ -53,7 +53,7 @@ export default function BestellStatus() {
   return (
     <Shell>
       <div className={`rounded-3xl p-8 text-center ${ready ? 'bg-rasen text-white' : o.status === 'open' ? 'bg-stroh' : 'bg-ink text-white'}`}>
-        <p className="text-sm opacity-70">{o.fulfillment === 'table' ? `Lieferung an ${o.table_label}` : 'Deine Abholnummer'}</p>
+        <p className="text-sm opacity-70">Bestellung für {o.table_label}</p>
         <p className="font-display font-extrabold text-8xl leading-none mt-2 tabular-nums">{o.number}</p>
         <p className="font-display font-bold text-2xl mt-5">{h}</p>
         <p className="mt-1 opacity-80">{p}</p>

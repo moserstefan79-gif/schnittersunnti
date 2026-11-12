@@ -273,8 +273,6 @@ from (values
 join public.menu_categories c on c.name = i.cat;
 
 insert into public.tables (code, label, zone) values
-  ('ABHOLEN', 'Abholung an der Theke', 'Theke'),
   ('T1', 'Tisch 1', 'Festzelt'), ('T2', 'Tisch 2', 'Festzelt'), ('T3', 'Tisch 3', 'Festzelt'),
   ('T4', 'Tisch 4', 'Festzelt'), ('T5', 'Tisch 5', 'Festzelt'), ('T6', 'Tisch 6', 'Festzelt'),
   ('G1', 'Biergarten 1', 'Biergarten'), ('G2', 'Biergarten 2', 'Biergarten'), ('G3', 'Biergarten 3', 'Biergarten');
-update public.tables set delivery_allowed = false where code = 'ABHOLEN';

@@ -4,12 +4,12 @@ import { supabaseConfigured, asset } from '../lib/supabase.js'
 import { fetchMenu, fetchTable, placeOrder, startPayment, chf, remember, recall } from '../lib/orders.js'
 
 export default function Bestellen() {
-  const { code } = useParams()                 // QR: /bestellen/T12  oder /bestellen (Abholung)
+  const { code } = useParams()                 // QR: /bestellen/T12
   const [table, setTable] = useState(undefined)
   const [menu, setMenu] = useState([])
   const [cart, setCart] = useState({})          // item_id -> qty
   const [step, setStep] = useState('menu')      // menu | checkout
-  const [fulfillment, setFulfillment] = useState('pickup')
+  const fulfillment = 'table'
   const [guest, setGuest] = useState('')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
@@ -19,7 +19,7 @@ export default function Bestellen() {
   useEffect(() => {
     if (!supabaseConfigured) return
     fetchMenu().then(setMenu)
-    if (code) fetchTable(code.toUpperCase()).then(t => { setTable(t); if (t?.delivery_allowed) setFulfillment('table') })
+    if (code) fetchTable(code.toUpperCase()).then(t => setTable(t?.delivery_allowed ? t : null))
     else setTable(null)
   }, [code])
 
@@ -62,19 +62,7 @@ export default function Bestellen() {
         </ul>
         {deposit > 0 && <p className="mt-3 text-sm text-ink/60">Depot bekommst du an der Theke zurück – bar oder auf dein Zahlungsmittel.</p>}
 
-        {table?.delivery_allowed && (
-          <fieldset className="mt-6">
-            <legend className="font-semibold">Wie möchtest du es?</legend>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {[['table', `An ${table.label} bringen`], ['pickup', 'Selbst abholen']].map(([v, l]) => (
-                <label key={v} className={`cursor-pointer rounded-xl border-2 px-4 py-3 text-center font-semibold ${fulfillment === v ? 'border-orange bg-orange/10' : 'border-line'}`}>
-                  <input type="radio" className="sr-only" name="f" value={v} checked={fulfillment === v} onChange={() => setFulfillment(v)} />{l}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-        )}
-        {fulfillment === 'pickup' && <p className="mt-4 text-ink/70">Du bekommst eine Nummer. Sobald sie auf der Tafel leuchtet, holst du an der Theke ab.</p>}
+        <p className="mt-6 rounded-xl bg-stroh px-4 py-3 font-semibold">Wir bringen alles an {table.label}.</p>
 
         <label className="block mt-5"><span className="text-sm font-medium">Dein Vorname (für die Lieferung)</span>
           <input className="field mt-1" value={guest} onChange={e => setGuest(e.target.value)} placeholder="z.B. Stefan" /></label>
@@ -93,9 +81,15 @@ export default function Bestellen() {
   }
 
   return (
-    <Shell title={table ? table.label : 'Bestellen & abholen'} table={table}>
+    <Shell title={table ? table.label : 'Bestellen am Tisch'} table={table}>
+      {table === null && (
+        <div className="mb-8 rounded-2xl border border-line p-5">
+          <p className="font-semibold">Scanne den QR-Code an deinem Tisch.</p>
+          <p className="mt-1 text-ink/70">Dann siehst du die Karte, bezahlst mit Twint oder Karte, und wir bringen dir alles an den Tisch. Ohne Tischcode geht es an der Theke – bar oder mit Karte.</p>
+        </div>
+      )}
       {last && <Link to={`/bestellen/status/${last.id}?t=${last.token}`} className="block mb-6 rounded-xl bg-stroh px-4 py-3 text-sm">Deine letzte Bestellung <b>#{last.number}</b> ansehen →</Link>}
-      {menu.map(c => (
+      {table && menu.map(c => (
         <section key={c.id} className="mb-8">
           <h2 className="text-2xl md:text-3xl">{c.name}</h2>
           <ul className="mt-3 divide-y divide-line border-y border-line">
@@ -117,7 +111,7 @@ export default function Bestellen() {
           </ul>
         </section>
       ))}
-      {count > 0 && (
+      {count > 0 && table && (
         <div className="sticky bottom-4">
           <button onClick={() => setStep('checkout')} className="btn btn-primary w-full text-lg shadow-xl justify-between px-6">
             <span>{count} {count === 1 ? 'Artikel' : 'Artikel'}</span><span>Weiter · {chf(total)}</span>
@@ -138,7 +132,6 @@ export function Shell({ title, table, children }) {
           {title && <h1 className="text-2xl leading-none">{title}</h1>}
         </div>
       </div>
-      {table === null && title && <p className="mt-2 text-sm text-ink/60">Du bestellst zum Abholen an der Theke.</p>}
       <div className="mt-6">{children}</div>
     </div>
   )

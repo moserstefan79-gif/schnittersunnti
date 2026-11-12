@@ -81,7 +81,7 @@ export default function Home() {
               Unser Areal an der Schulhausstrasse wird so zum «Home of Football» – Festwirtschaft, Biergarten und Bar unter einem Dach.
               Dazu Wein von Legio Julius und eine alkoholfreie Auswahl für alle.
             </p>
-            <p className="mt-4 text-ink/80 max-w-md">Neu: am Tisch per QR-Code bestellen und mit Twint bezahlen – wir bringen es dir oder du holst es an der Theke ab.</p>
+            <p className="mt-4 text-ink/80 max-w-md">Neu: am Tisch per QR-Code bestellen und mit Twint bezahlen – wir bringen es dir an den Tisch.</p>
             <p className="mt-4 text-ink/80 max-w-md">Und auf dem Screen: die K.o.-Spiele der Frauen-WM 2027 – <a href="#spiele" className="underline hover:text-orange-deep">was wir zeigen</a>.</p>
             <a href={asset("/karte-2026.jpg")} target="_blank" rel="noreferrer" className="btn btn-ghost mt-6">Karte 2026 ansehen</a>
             <figure className="mt-8 max-w-md">

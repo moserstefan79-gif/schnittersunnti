@@ -57,7 +57,7 @@ export default function Admin() {
       </div>
       <div className="mt-6 flex flex-wrap gap-2 text-sm">
         <span className="text-ink/60 self-center">Betrieb am Fest:</span>
-        {[['/station/kueche', 'Küche'], ['/station/theke', 'Theke & Depot'], ['/station/bar', 'Brasil-Bar'], ['/tafel', 'Abholtafel'], ['/bestellen', 'Gast-Ansicht']].map(([to, l]) => (
+        {[['/station/kueche', 'Küche'], ['/station/theke', 'Theke & Depot'], ['/station/bar', 'Brasil-Bar'], ['/bestellen', 'Gast-Ansicht']].map(([to, l]) => (
           <Link key={to} to={to} target="_blank" className="btn btn-ghost !py-1.5">{l}</Link>
         ))}
       </div>

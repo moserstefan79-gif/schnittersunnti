@@ -86,7 +86,7 @@ function Board({ station, userId }) {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="font-display font-extrabold text-4xl leading-none tabular-nums">{o.number}</p>
-                    <p className="mt-1 font-semibold">{o.fulfillment === 'table' ? `→ ${o.tables?.label}` : 'Abholung'}{o.guest_name ? ` · ${o.guest_name}` : ''}</p>
+                    <p className="mt-1 font-semibold">→ {o.tables?.label}{o.guest_name ? ` · ${o.guest_name}` : ''}</p>
                   </div>
                   <span className={`text-sm tabular-nums ${late ? 'text-orange-deep font-bold' : 'text-ink/60'}`}>{m} min</span>
                 </div>
@@ -106,7 +106,7 @@ function Board({ station, userId }) {
                 )}
                 {tab === 'offen'
                   ? <button onClick={() => stationDone(o)} className="btn btn-dark w-full">Alles bereit</button>
-                  : (o.status === 'ready' && <button onClick={() => delivered(o)} className="btn bg-rasen text-white w-full">{o.fulfillment === 'table' ? 'Geliefert' : 'Abgeholt'}</button>)}
+                  : (o.status === 'ready' && <button onClick={() => delivered(o)} className="btn bg-rasen text-white w-full">Geliefert</button>)}
               </li>
             )
           })}

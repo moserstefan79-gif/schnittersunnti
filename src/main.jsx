@@ -12,7 +12,6 @@ import Admin from './pages/Admin.jsx'
 import Bestellen from './pages/Bestellen.jsx'
 import BestellStatus from './pages/BestellStatus.jsx'
 import Station from './pages/Station.jsx'
-import Tafel from './pages/Tafel.jsx'
 import { AuthProvider } from './components/AuthProvider.jsx'
 
 const Router = DEMO ? HashRouter : BrowserRouter
@@ -33,7 +32,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/bestellen/status/:id" element={<BestellStatus />} />
           <Route path="/bestellen/:code" element={<Bestellen />} />
           <Route path="/station/:station" element={<Station />} />
-          <Route path="/tafel" element={<Tafel />} />
           <Route path="/demo-pay/:id" element={<DemoPay />} />
         </Routes>
       </AuthProvider>

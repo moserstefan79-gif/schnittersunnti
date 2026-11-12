@@ -8,7 +8,6 @@ const stops = [
   ['/bestellen/T3', 'Gast: Tisch 3'],
   ['/station/kueche', 'Küche'],
   ['/station/theke', 'Theke & Depot'],
-  ['/tafel', 'Abholtafel'],
   ['/admin', 'Admin'],
 ]
 

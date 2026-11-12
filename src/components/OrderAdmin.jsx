@@ -80,7 +80,7 @@ function TablesAdmin() {
   return (
     <section className="mt-16">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div><h2 className="text-3xl">Tische & QR-Codes</h2><p className="mt-2 text-ink/70">Jeder Tisch bekommt einen QR-Code auf <code>/bestellen/CODE</code>. «ABHOLEN» ist der Code für Theke/Bierdeckel ohne Lieferung.</p></div>
+        <div><h2 className="text-3xl">Tische & QR-Codes</h2><p className="mt-2 text-ink/70">Jeder Tisch bekommt einen QR-Code auf <code>/bestellen/CODE</code>. Alles wird an den Tisch gebracht – jeder QR gehört zu einem Tisch oder Standort.</p></div>
         <button onClick={printQr} className="btn btn-dark">QR-Karten drucken (A6)</button>
       </div>
       <form onSubmit={add} className="mt-4 flex flex-wrap gap-2 items-end">
@@ -92,7 +92,7 @@ function TablesAdmin() {
       <ul className="mt-4 flex flex-wrap gap-2">
         {tables.map(t => (
           <li key={t.code} className={`rounded-full border px-3 py-1 text-sm ${t.active ? 'border-ink/30' : 'border-line text-ink/40 line-through'}`}>
-            <b>{t.code}</b> {t.label}{!t.delivery_allowed && ' · nur Abholung'}
+            <b>{t.code}</b> {t.label}{!t.delivery_allowed && ' · keine Lieferung'}
             <button onClick={async () => { await supabase.from('tables').update({ active: !t.active }).eq('code', t.code); load() }} className="ml-2 text-ink/50 hover:text-orange-deep">{t.active ? '×' : '↺'}</button>
           </li>
         ))}
@@ -123,7 +123,7 @@ function SalesSummary() {
     <section className="mt-16">
       <h2 className="text-3xl">Online-Umsatz</h2>
       <dl className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-px bg-line border border-line">
-        {[['Bestellungen', s.n], ['Umsatz inkl. Depot', chf(s.total)], ['Depot offen', chf(s.deposit - s.returned)], ['davon Tischlieferung', s.table]].map(([l, v]) => (
+        {[['Bestellungen', s.n], ['Umsatz inkl. Depot', chf(s.total)], ['Depot offen', chf(s.deposit - s.returned)], ['Depot zurückgegeben', chf(s.returned)]].map(([l, v]) => (
           <div key={l} className="bg-paper p-4"><dt className="text-sm text-ink/60">{l}</dt><dd className="font-display font-bold text-2xl mt-1">{v}</dd></div>
         ))}
       </dl>
