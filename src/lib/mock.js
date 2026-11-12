@@ -21,7 +21,7 @@ const db = {
 
 // Schichten wie im Seed
 const blocks = [
-  ['2027-07-15', '18:00', '23:00', [['Aufbau', 'Zelte aufstellen', 5]]],
+  ['2027-07-15', '18:00', '23:00', [['Aufbau', 'Zelte aufstellen', 8]]],
   ['2027-07-16', '14:00', '18:00', [['Aufbau', 'Zelt, Bänke, Theke und Technik aufstellen', 5]]],
   ['2027-07-16', '18:30', '22:30', [['Theke', 'Getränkeausgabe im Biergarten', 3], ['Küche', 'Älplermagronen, Fleischkäse, Fish & Chips', 2], ['Service', 'Bringen an die Tische, Abräumen, Becher', 3], ['Bar', 'Brasil-Bar – Drinks & Cocktails', 3], ['Kasse', 'Kasse & Depot', 2]]],
   ['2027-07-16', '22:00', '02:30', [['Theke', 'Getränkeausgabe im Biergarten', 3], ['Küche', 'Älplermagronen, Fleischkäse, Fish & Chips', 2], ['Service', 'Bringen an die Tische, Abräumen, Becher', 2], ['Bar', 'Brasil-Bar – Drinks & Cocktails', 2], ['Kasse', 'Kasse & Depot', 1]]],
