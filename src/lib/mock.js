@@ -20,15 +20,22 @@ const db = {
 
 // Schichten wie im Seed
 const blocks = [
-  ['2027-07-16', '14:00', '18:00', 'aufbau'], ['2027-07-16', '18:30', '22:30', 'b'], ['2027-07-16', '22:00', '02:30', 'b'],
-  ['2027-07-17', '16:30', '20:30', 'b'], ['2027-07-17', '20:00', '00:00', 'b'], ['2027-07-17', '23:30', '03:30', 'b'],
-  ['2027-07-18', '08:30', '12:30', 'bm'], ['2027-07-18', '12:00', '16:00', 'b'], ['2027-07-18', '15:30', '19:30', 'b'], ['2027-07-18', '19:00', '23:59', 'b'],
+  ['2027-07-16', '14:00', '18:00', 'aufbau'],
+  ['2027-07-16', '18:30', '22:30', 'b'],
+  ['2027-07-16', '22:00', '02:30', 'b'],
+  ['2027-07-17', '16:30', '20:30', 'b'],
+  ['2027-07-17', '20:00', '00:00', 'b'],
+  ['2027-07-17', '23:30', '03:30', 'b'],
+  ['2027-07-18', '08:30', '12:30', 'bm'],
+  ['2027-07-18', '12:00', '15:30', 'b'],
+  ['2027-07-18', '15:00', '18:30', 'b'],
+  ['2027-07-18', '18:00', '21:00', 'abbau_so'],
   ['2027-07-19', '08:00', '12:00', 'abbau'],
 ]
 const posts = {
   b: [['Theke', 'Getränkeausgabe im Biergarten', 3], ['Küche', 'Älplermagronen, Fleischkäse, Fish & Chips', 2], ['Service', 'Bedienung in der Festwirtschaft', 3], ['Bar', 'Brasil-Bar – Drinks & Cocktails', 2], ['Kasse', 'Kasse & Jetons', 1]],
   bm: [['Theke', 'Kaffee & Getränkeausgabe', 3], ['Küche', 'Mittagsbetrieb vorbereiten', 3], ['Service', 'Bedienung in der Festwirtschaft', 3], ['Kasse', 'Kasse & Jetons', 1]],
-  aufbau: [['Aufbau', 'Zelt, Bänke, Theke und Technik aufstellen', 5]], abbau: [['Abbau', 'Abbau, Reinigung, Materialrückgabe', 5]],
+  aufbau: [['Aufbau', 'Zelt, Bänke, Theke und Technik aufstellen', 5]], abbau_so: [['Abbau', 'Leergut, Kühlmaterial und Becher-Boxen zurückstellen, Küche reinigen', 5]], abbau: [['Abbau', 'Zelte und Mobiliar abbauen, Materialrückgabe', 5]],
 }
 for (const [d, s, e, k] of blocks) {
   const end = e > s ? d : new Date(new Date(d + 'T12:00:00Z').getTime() + 864e5).toISOString().slice(0, 10)

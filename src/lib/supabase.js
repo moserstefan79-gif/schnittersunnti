@@ -17,7 +17,7 @@ export const EVENT = {
   days: [
     { key: '2027-07-16', label: 'Freitag', date: '16. Juli', hours: '19:00 – 02:00' },
     { key: '2027-07-17', label: 'Samstag', date: '17. Juli', hours: '17:00 – 03:00' },
-    { key: '2027-07-18', label: 'Sonntag', date: '18. Juli', hours: '09:00 – 23:30' },
+    { key: '2027-07-18', label: 'Sonntag', date: '18. Juli', hours: '09:00 – 18:00' },
   ],
   signupDeadline: '28. Februar 2027',
   contact: {
