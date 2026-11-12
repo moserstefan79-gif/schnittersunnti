@@ -42,7 +42,7 @@ for (const [d, s, e, posts] of blocks) {
 // ein paar Anmeldungen
 const pick = (i) => db.shifts[i].id
 ;[[1, 'u2'], [1, 'u3'], [2, 'u4'], [6, 'u2'], [8, DEMO_USER.id], [20, 'u3'], [20, 'u4'], [31, DEMO_USER.id], [0, 'u2'], [0, 'u3'], [0, 'u4']]
-  .forEach(([i, u], k) => db.shift_signups.push({ id: uid(), shift_id: pick(i), user_id: u, status: k % 3 === 0 ? 'confirmed' : 'wish', created_at: new Date().toISOString() }))
+  .forEach(([i, u], k) => db.shift_signups.push({ id: uid(), shift_id: pick(i), user_id: u, status: k % 3 === 0 ? 'confirmed' : 'wish', attendance: k === 0 ? 'present' : null, checked_at: null, checked_by: null, created_at: new Date().toISOString() }))
 
 db.matches = [
   { id: uid(), kicks_off_at: '2027-07-16T21:00:00+02:00', competition: 'Frauen-WM 2027', stage: 'Viertelfinal', home: 'Sieger Achtelfinal 1', away: 'Sieger Achtelfinal 2', note: 'Brasil-Bar bis 02:00', is_published: true },
@@ -103,9 +103,14 @@ const views = {
     const taken = db.shift_signups.filter(x => x.shift_id === s.id && x.status === 'confirmed').length
     const wishes = db.shift_signups.filter(x => x.shift_id === s.id && x.status === 'wish').length
     const my = db.shift_signups.find(x => x.shift_id === s.id && x.user_id === session?.user.id)
-    return { ...s, taken, wishes, free: s.capacity - taken, mine: !!my, mine_status: my?.status ?? null }
+    return { ...s, taken, wishes, free: s.capacity - taken, mine: !!my, mine_status: my?.status ?? null, mine_attendance: my?.attendance ?? null }
   }),
   shift_roster: () => db.shift_signups.map(su => ({ ...su, ...pickProfile(su.user_id) })),
+  helper_summary: () => db.profiles.map(p => {
+    const mine = db.shift_signups.filter(su => su.user_id === p.id)
+    const hrs = mine.filter(su => su.attendance === 'present').reduce((a, su) => { const s = db.shifts.find(x => x.id === su.shift_id); return a + (new Date(s.ends_at) - new Date(s.starts_at)) / 36e5 }, 0)
+    return { user_id: p.id, full_name: p.full_name, team: p.team, phone: p.phone, assigned: mine.filter(su => su.status === 'confirmed').length, present: mine.filter(su => su.attendance === 'present').length, absent: mine.filter(su => su.attendance === 'absent').length, hours_present: hrs.toFixed(1) }
+  }),
   pickup_board: () => db.orders.filter(o => ['paid', 'in_progress', 'ready'].includes(o.status) && o.fulfillment === 'pickup').map(o => ({ number: o.number, status: o.status, fulfillment: o.fulfillment, ready_at: o.ready_at })),
 }
 const pickProfile = (id) => { const p = db.profiles.find(p => p.id === id) ?? {}; return { full_name: p.full_name, phone: p.phone, team: p.team } }

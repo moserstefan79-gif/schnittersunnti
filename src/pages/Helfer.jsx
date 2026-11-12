@@ -132,6 +132,19 @@ function ShiftBoard({ profile, userId }) {
         : `${taken} von ${total} Plätzen sind besetzt. Wähle eine oder mehrere Schichten – eine zugeteilte Schicht ist verbindlich; wenn du verhindert bist, melde dich beim OK.`}
       aside={profile?.is_admin && <Link to="/admin" className="btn btn-ghost">Admin-Übersicht</Link>}
     >
+      {/* Einsatzbestätigung nach dem Fest */}
+      {mine.some(s => s.mine_attendance === 'present') && (
+        <div className="mb-6 rounded-2xl bg-rasen text-white p-6 md:p-8 print:bg-white print:text-ink print:border">
+          <p className="text-sm opacity-80">Einsatzbestätigung Schnittersunnti {EVENT.year}</p>
+          <p className="font-display font-bold text-2xl md:text-3xl mt-1">Merci, {profile?.full_name}!</p>
+          <p className="mt-2">
+            {mine.filter(s => s.mine_attendance === 'present').length} {mine.filter(s => s.mine_attendance === 'present').length === 1 ? 'Schicht' : 'Schichten'},{' '}
+            {mine.filter(s => s.mine_attendance === 'present').reduce((a, s) => a + (new Date(s.ends_at) - new Date(s.starts_at)) / 36e5, 0).toFixed(1).replace('.0', '')} Stunden im Home of Football – bestätigt vom OK FC Beizli.
+          </p>
+          <button onClick={() => window.print()} className="mt-4 btn bg-white text-rasen !py-2 text-sm print:hidden">Als PDF sichern</button>
+        </div>
+      )}
+
       {/* Meine Schichten */}
       <div className="rounded-2xl bg-ink text-white p-6 md:p-8">
         <h2 className="text-2xl">{wishMode ? 'Meine Wunschschichten' : 'Meine Schichten'}</h2>
@@ -144,7 +157,9 @@ function ShiftBoard({ profile, userId }) {
                 <span className="font-display font-bold text-xl text-orange">{s.area}</span>
                 <span>{fmtDay(s.day)}</span>
                 <span className="text-white/70">{fmtTime(s.starts_at)} – {fmtTime(s.ends_at)}</span>
-                <span className={`mt-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold ${s.mine_status === 'confirmed' ? 'bg-rasen text-white' : 'bg-orange text-ink'}`}>{s.mine_status === 'confirmed' ? 'Zugeteilt' : 'Wunsch'}</span>
+                <span className={`mt-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold ${s.mine_attendance === 'present' ? 'bg-white text-rasen' : s.mine_attendance === 'absent' ? 'bg-orange-deep text-white' : s.mine_status === 'confirmed' ? 'bg-rasen text-white' : 'bg-orange text-ink'}`}>
+                  {s.mine_attendance === 'present' ? '✓ Einsatz bestätigt' : s.mine_attendance === 'absent' ? 'Nicht erschienen' : s.mine_status === 'confirmed' ? 'Zugeteilt' : 'Wunsch'}
+                </span>
                 {s.mine_status === 'confirmed'
                   ? <a href={`mailto:${EVENT.contact.email}?subject=Schicht%20abgeben%20${encodeURIComponent(s.area + ' ' + fmtDay(s.day) + ' ' + fmtTime(s.starts_at))}`} className="mt-2 self-start text-xs text-white/60 hover:text-white underline">Verhindert? OK anfragen</a>
                   : <button onClick={() => toggle(s)} disabled={busyId === s.id} className="mt-2 self-start text-sm underline text-white/70 hover:text-white">Wunsch entfernen</button>}

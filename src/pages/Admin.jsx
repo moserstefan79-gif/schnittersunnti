@@ -12,6 +12,7 @@ export default function Admin() {
   const [filter, setFilter] = useState('alle') // alle | offen
   const [mode, setMode] = useState('open')
   const [profiles, setProfiles] = useState([])
+  const [summary, setSummary] = useState([])
   const [msg, setMsg] = useState(null)
 
   async function load() {
@@ -22,6 +23,7 @@ export default function Admin() {
       supabase.from('profiles').select('id, full_name, phone, team, is_admin, created_at').order('created_at', { ascending: false }),
     ])
     setShifts(sh ?? []); setRoster(ro ?? []); if (st) setMode(st.value); setProfiles(pr ?? [])
+    const { data: su } = await supabase.from('helper_summary').select('*').order('full_name'); setSummary(su ?? [])
   }
   useEffect(() => { if (supabaseConfigured && profile?.is_admin) load() }, [profile])
 
@@ -90,7 +92,7 @@ export default function Admin() {
       </div>
       <div className="mt-6 flex flex-wrap gap-2 text-sm">
         <span className="text-ink/60 self-center">Betrieb am Fest:</span>
-        {[['/station/kueche', 'Küche'], ['/station/theke', 'Theke & Depot'], ['/station/bar', 'Brasil-Bar'], ['/bestellen', 'Gast-Ansicht']].map(([to, l]) => (
+        {[['/praesenz', 'Präsenzkontrolle'], ['/station/kueche', 'Küche'], ['/station/theke', 'Theke & Depot'], ['/station/bar', 'Brasil-Bar'], ['/bestellen', 'Gast-Ansicht']].map(([to, l]) => (
           <Link key={to} to={to} target="_blank" className="btn btn-ghost !py-1.5">{l}</Link>
         ))}
       </div>
@@ -142,6 +144,8 @@ export default function Admin() {
         </div>
       </section>
 
+      <Einsatzbilanz summary={summary} roster={roster} shifts={shifts} />
+
       <MatchEditor />
       <OrderAdmin />
     </div>
@@ -176,5 +180,46 @@ function Row({ s, people, dayRow, onStatus }) {
         </td>
       </tr>
     </>
+  )
+}
+
+// Einsatzbilanz nach dem Fest – für den Vorstand
+function Einsatzbilanz({ summary, roster, shifts }) {
+  const checked = roster.filter(r => r.attendance).length
+  if (checked === 0) return (
+    <section className="mt-16">
+      <h2 className="text-3xl">Einsatzbilanz</h2>
+      <p className="mt-2 text-ink/70">Erscheint, sobald am Fest Präsenzen erfasst sind (Seite «Präsenzkontrolle» auf dem Handy).</p>
+    </section>
+  )
+  const byTeam = Object.values(summary.reduce((m, h) => {
+    const k = h.team || 'ohne Mannschaft'; (m[k] ||= { team: k, helpers: 0, assigned: 0, present: 0, absent: 0, hours: 0 })
+    m[k].helpers++; m[k].assigned += h.assigned; m[k].present += h.present; m[k].absent += h.absent; m[k].hours += Number(h.hours_present); return m
+  }, {})).sort((a, b) => b.hours - a.hours)
+  const totalHours = summary.reduce((a, h) => a + Number(h.hours_present), 0)
+  const noShows = summary.filter(h => h.absent > 0)
+
+  function exportCsv() {
+    const rows = [['Name', 'Mannschaft', 'Telefon', 'Zugeteilt', 'Anwesend', 'Nicht erschienen', 'Stunden']]
+    for (const h of summary.filter(h => h.assigned > 0)) rows.push([h.full_name, h.team ?? '', h.phone ?? '', h.assigned, h.present, h.absent, h.hours_present])
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n')
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' })); a.download = 'einsatzbilanz-schnittersunnti.csv'; a.click()
+  }
+
+  return (
+    <section className="mt-16">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div><h2 className="text-3xl">Einsatzbilanz für den Vorstand</h2>
+          <p className="mt-2 text-ink/70">{summary.filter(h => h.present > 0).length} Helfende im Einsatz · {totalHours.toFixed(0)} Stunden geleistet · {checked} von {roster.filter(r => r.status === 'confirmed').length} Schichten kontrolliert</p></div>
+        <button onClick={exportCsv} className="btn btn-dark">Bilanz als CSV</button>
+      </div>
+      <table className="mt-4 w-full text-[15px]">
+        <thead className="text-left text-ink/60 border-b border-line"><tr><th className="py-2 pr-4 font-medium">Mannschaft</th><th className="py-2 pr-4 font-medium">Helfende</th><th className="py-2 pr-4 font-medium">Schichten</th><th className="py-2 pr-4 font-medium">Anwesend</th><th className="py-2 pr-4 font-medium">Fehlend</th><th className="py-2 font-medium">Stunden</th></tr></thead>
+        <tbody>{byTeam.map(t => <tr key={t.team} className="border-t border-line"><td className="py-2 pr-4 font-semibold">{t.team}</td><td className="py-2 pr-4">{t.helpers}</td><td className="py-2 pr-4">{t.assigned}</td><td className="py-2 pr-4 text-rasen">{t.present}</td><td className="py-2 pr-4 text-orange-deep">{t.absent}</td><td className="py-2 tabular-nums">{t.hours.toFixed(1)}</td></tr>)}</tbody>
+      </table>
+      {noShows.length > 0 && (
+        <p className="mt-4 text-sm text-ink/70">Nicht erschienen: {noShows.map(h => `${h.full_name} (${h.absent})`).join(', ')}</p>
+      )}
+    </section>
   )
 }

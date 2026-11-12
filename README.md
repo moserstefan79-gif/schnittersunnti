@@ -13,6 +13,7 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
    - `supabase/migrations/003_matches.sql` – Tabelle `matches` für die Spiele auf dem Screen (Admins pflegen sie unter `/admin`)
    - `supabase/migrations/004_order_and_pay.sql` – Order & Pay: Karte (payfix-Artikelnummern), Tische, Bestellungen, Depot, Druckjobs
    - `supabase/migrations/005_wish_phase.sql` – Wunschphase/Zuteilung (`settings.signup_mode`), Preise 2027
+   - `supabase/migrations/006_attendance.sql` – Anwesenheitskontrolle, Einsatzbilanz
 3. **Auth**: Authentication → Providers → Email aktiviert lassen. «Confirm email» nach Wunsch (für den Vereinsgebrauch darf es auch aus sein).
    Unter Authentication → URL Configuration die Site-URL (z.B. `https://www.schnittersunnti.ch`) und `…/helfer` als Redirect eintragen.
 4. **`.env`** aus `.env.example` kopieren, `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` (Publishable Key) eintragen.
@@ -21,6 +22,10 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
 ## Helferphasen
 
 `settings.signup_mode` = `"wishes"` (Standard bis Januar): Helfer merken sich Wunschschichten ohne Platzlimit. Admin unter `/admin`: «Wünsche zuteilen» bestätigt Wünsche in Anmeldereihenfolge bis die Schicht voll ist; «Phase «Zuteilung» starten» schaltet auf verbindliche Selbstanmeldung (`"open"`). Einzelne Wünsche lassen sich pro Person zuteilen oder zurücksetzen.
+
+## Präsenz am Fest
+
+`/praesenz` (Admin, fürs Handy): pro Tag und Block die zugeteilten Helfer mit ✓ / ✕. Helfer sehen danach im Portal «✓ Einsatz bestätigt» und eine Einsatzbestätigung mit Stunden (als PDF druckbar). Im Admin erscheint die «Einsatzbilanz für den Vorstand» nach Mannschaft mit CSV-Export.
 
 ## Admin freischalten
 

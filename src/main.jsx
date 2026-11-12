@@ -10,6 +10,7 @@ import Home from './pages/Home.jsx'
 import Helfer from './pages/Helfer.jsx'
 import Admin from './pages/Admin.jsx'
 import Rueckblick from './pages/Rueckblick.jsx'
+import Praesenz from './pages/Praesenz.jsx'
 import Bestellen from './pages/Bestellen.jsx'
 import BestellStatus from './pages/BestellStatus.jsx'
 import Station from './pages/Station.jsx'
@@ -34,6 +35,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/bestellen/status/:id" element={<BestellStatus />} />
           <Route path="/bestellen/:code" element={<Bestellen />} />
           <Route path="/station/:station" element={<Station />} />
+          <Route path="/praesenz" element={<Praesenz />} />
           <Route path="/demo-pay/:id" element={<DemoPay />} />
         </Routes>
       </AuthProvider>
