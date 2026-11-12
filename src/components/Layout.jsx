@@ -81,11 +81,16 @@ export default function Layout() {
             <a href="https://www.fc-kirchberg.ch/" target="_blank" rel="noreferrer" className="hover:text-orange">fc-kirchberg.ch</a>
             <a href="https://www.kirchberg-be.ch/" target="_blank" rel="noreferrer" className="hover:text-orange">Gemeinde Kirchberg BE</a>
             <Link to="/helfer" className="hover:text-orange">Helfereinsatz</Link>
+            <Link to="/rueckblick-2026" className="hover:text-orange">Rückblick 2026</Link>
             {profile?.is_admin && <Link to="/admin" className="hover:text-orange">Admin</Link>}
             {session && supabase && (
               <button onClick={() => supabase.auth.signOut()} className="text-left hover:text-orange">Abmelden</button>
             )}
           </div>
+        </div>
+        <div className="mx-auto max-w-6xl px-4 pb-6 flex items-center gap-4">
+          <img src={asset("/qr-website.png")} alt="QR-Code zu www.schnittersunnti.ch" width="400" height="400" loading="lazy" className="h-20 w-20 rounded-lg bg-white p-1" />
+          <p className="text-sm text-white/60 max-w-xs">Seite teilen: QR-Code scannen oder Foto davon weitergeben – führt direkt hierher.</p>
         </div>
         <p className="mx-auto max-w-6xl px-4 pb-8 text-sm text-white/50">© {new Date().getFullYear()} FC Kirchberg · 1924 gegründet · Orange und Schwarz</p>
       </footer>

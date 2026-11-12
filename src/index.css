@@ -69,3 +69,51 @@ h1, h2, h3, .display {
   background-image: repeating-linear-gradient(90deg, var(--color-orange) 0 24px, transparent 24px 36px);
   height: 6px;
 }
+
+/* ---------- Verspielte Elemente ---------- */
+.swoosh {
+  position: relative; display: inline-block; isolation: isolate;
+}
+.swoosh::after {
+  content: ""; position: absolute; left: -2%; right: -2%; bottom: -0.12em; height: 0.28em;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'><path d='M2 14 C 40 2, 80 20, 120 8 S 180 4, 198 12' fill='none' stroke='%23FF7000' stroke-width='6' stroke-linecap='round'/></svg>") no-repeat center / 100% 100%;
+  z-index: -1;
+}
+.tilt-l { transform: rotate(-1.5deg); }
+.tilt-r { transform: rotate(1.5deg); }
+.tilt-l, .tilt-r { transition: transform .25s ease; }
+.tilt-l:hover, .tilt-r:hover { transform: rotate(0) scale(1.02); }
+
+.sticker {
+  display: inline-block; transform: rotate(-6deg);
+  background: var(--color-orange); color: var(--color-ink);
+  font-family: var(--font-display); font-weight: 800; line-height: 1;
+  padding: .6em .9em; border-radius: 999px; box-shadow: 0 6px 0 var(--color-ink);
+}
+
+.ticket {
+  position: relative; background: var(--color-ink);
+  border-radius: 14px;
+  -webkit-mask: radial-gradient(circle at 0 50%, transparent 11px, #000 12px) left / 51% 100% no-repeat,
+                radial-gradient(circle at 100% 50%, transparent 11px, #000 12px) right / 51% 100% no-repeat;
+          mask: radial-gradient(circle at 0 50%, transparent 11px, #000 12px) left / 51% 100% no-repeat,
+                radial-gradient(circle at 100% 50%, transparent 11px, #000 12px) right / 51% 100% no-repeat;
+}
+.ticket::before {
+  content: ""; position: absolute; top: 14px; bottom: 14px; left: 30%;
+  border-left: 2px dashed rgba(255,255,255,.3);
+}
+
+.flag { height: 8px; display: flex; border-radius: 999px; overflow: hidden; }
+.flag > i { flex: 1; display: block; }
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-22px) rotate(25deg); }
+}
+.ball { animation: bounce 1.6s ease-in-out infinite; transform-origin: center; }
+@keyframes roll { from { transform: translateX(-10%) rotate(0); } to { transform: translateX(110vw) rotate(1080deg); } }
+.roll { animation: roll 14s linear infinite; }
+
+@keyframes wiggle { 0%,100% { transform: rotate(-6deg);} 50% { transform: rotate(-3deg);} }
+.sticker { animation: wiggle 3s ease-in-out infinite; }

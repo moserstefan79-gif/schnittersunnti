@@ -9,6 +9,7 @@ import Layout from './components/Layout.jsx'
 import Home from './pages/Home.jsx'
 import Helfer from './pages/Helfer.jsx'
 import Admin from './pages/Admin.jsx'
+import Rueckblick from './pages/Rueckblick.jsx'
 import Bestellen from './pages/Bestellen.jsx'
 import BestellStatus from './pages/BestellStatus.jsx'
 import Station from './pages/Station.jsx'
@@ -26,6 +27,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <Route path="/" element={<Home />} />
             <Route path="/helfer" element={<Helfer />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/rueckblick-2026" element={<Rueckblick />} />
           </Route>
           {/* Gast-Bestellung und Betriebs-Screens ohne Website-Rahmen */}
           <Route path="/bestellen" element={<Bestellen />} />
