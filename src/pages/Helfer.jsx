@@ -21,7 +21,7 @@ export default function Helfer() {
             </div>
           ))}
         </div>
-        <p className="mt-8 text-ink/75 max-w-2xl">Rund 107 Helferplätze in Theke, Küche, Service, Bar und Kasse – plus Aufbau am Freitag, Abbau am Sonntagabend und Montagmorgen. Du wählst deine Schicht künftig hier selbst, mit eigenem Login. Fragen vorab an <a href={`mailto:${EVENT.contact.email}`} className="underline hover:text-orange-deep">{EVENT.contact.email}</a>.</p>
+        <p className="mt-8 text-ink/75 max-w-2xl">Rund 112 Helferplätze in Theke, Küche, Service, Bar und Kasse – plus Zeltaufbau am Donnerstagabend, Aufbau am Freitag, Abbau am Sonntagabend und Montagmorgen. Du wählst deine Schicht künftig hier selbst, mit eigenem Login. Fragen vorab an <a href={`mailto:${EVENT.contact.email}`} className="underline hover:text-orange-deep">{EVENT.contact.email}</a>.</p>
       </Section>
     )
   }

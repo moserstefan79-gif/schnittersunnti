@@ -9,7 +9,7 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
 1. **Supabase-Projekt**: `schnittersunnti` (Ref `etvuxfgvhrojfthvkcte`, Region Zürich) – Migrationen 001–004 sind eingespielt (Stand 12.11.2026).
 2. **Migrationen ausführen** im SQL-Editor, in dieser Reihenfolge:
    - `supabase/migrations/001_schema.sql` – Tabellen, Trigger, Views, RLS
-   - `supabase/migrations/002_seed_shifts_2027.sql` – 42 Schichten / 107 Plätze für 16.–18. Juli 2027
+   - `supabase/migrations/002_seed_shifts_2027.sql` – 43 Schichten / 112 Plätze für 16.–18. Juli 2027
    - `supabase/migrations/003_matches.sql` – Tabelle `matches` für die Spiele auf dem Screen (Admins pflegen sie unter `/admin`)
    - `supabase/migrations/004_order_and_pay.sql` – Order & Pay: Karte (payfix-Artikelnummern), Tische, Bestellungen, Depot, Druckjobs
    - `supabase/migrations/005_wish_phase.sql` – Wunschphase/Zuteilung (`settings.signup_mode`), Preise 2027

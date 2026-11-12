@@ -1,5 +1,6 @@
 insert into public.shifts (day, starts_at, ends_at, area, description, capacity) values
-('2027-07-16','2027-07-16 14:00:00+02','2027-07-16 18:00:00+02','Aufbau','Zelt, Bänke, Theke und Technik aufstellen',5),
+('2027-07-15','2027-07-15 18:00:00+02','2027-07-15 23:00:00+02','Aufbau','Zelte aufstellen',5),
+('2027-07-16','2027-07-16 14:00:00+02,'2027-07-16 18:00:00+02','Aufbau','Zelt, Bänke, Theke und Technik aufstellen',5),
 ('2027-07-16','2027-07-16 18:30:00+02','2027-07-16 22:30:00+02','Theke','Getränkeausgabe im Biergarten',3),
 ('2027-07-16','2027-07-16 18:30:00+02','2027-07-16 22:30:00+02','Küche','Älplermagronen, Fleischkäse, Fish & Chips',2),
 ('2027-07-16','2027-07-16 18:30:00+02','2027-07-16 22:30:00+02','Service','Bringen an die Tische, Abräumen, Becher',3),
