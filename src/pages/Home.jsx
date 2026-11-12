@@ -73,7 +73,7 @@ export default function Home() {
               <p className="font-display font-semibold text-2xl md:text-3xl">Schnittersunnti Kirchberg</p>
             </div>
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link to="/helfer" className="btn btn-primary text-lg">Schicht übernehmen</Link>
+              <Link to="/helfer" className="btn btn-primary text-lg">Wunschschicht eintragen</Link>
               <a href="#angebot" className="btn btn-ghost text-lg">Was es gibt</a>
             </div>
           </div>
@@ -97,6 +97,18 @@ export default function Home() {
           </div>
           <p className="mx-auto max-w-6xl px-4 pb-6 text-ink/60">Schulhausstrasse, Dorfzentrum Kirchberg · keine Reservation nötig, einfach vorbeikommen.</p>
           <div className="hero-rule" />
+        </div>
+      </section>
+
+      {/* Teaser Helferanmeldung */}
+      <section className="bg-ink text-white">
+        <div className="mx-auto max-w-6xl px-4 py-8 grid gap-6 md:grid-cols-[auto_1fr_auto] items-center">
+          <span className="sticker text-base md:text-lg !shadow-[0_6px_0_#ff7000] !bg-white justify-self-start">Jetzt neu</span>
+          <div>
+            <p className="font-display font-bold text-2xl md:text-3xl leading-tight">Jetzt registrieren und deine Wunschschicht eintragen</p>
+            <p className="mt-1 text-white/70">Konto erstellen, Schichten merken, die passen – das OK teilt im Januar zu. Wer früh dran ist, hat die Auswahl.</p>
+          </div>
+          <Link to="/helfer" className="btn btn-primary text-lg justify-self-start md:justify-self-end">Zum Helferportal</Link>
         </div>
       </section>
 
