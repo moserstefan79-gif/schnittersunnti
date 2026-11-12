@@ -11,7 +11,7 @@ export default function Helfer() {
 
   if (!supabaseConfigured) {
     return (
-      <Section title="Helfereinsatz" lead="Die Schichtanmeldung öffnet im Januar 2027. Bis dahin: Mannschaft informieren, Wochenende freihalten.">
+      <Section title="Helfereinsatz" lead="Registrieren, Wunschschichten merken – die Zuteilung macht das OK im Januar 2027.">
         <div className="grid gap-6 md:grid-cols-3">
           {EVENT.days.map(d => (
             <div key={d.key} className="border border-line p-5">
@@ -79,10 +79,16 @@ function ShiftBoard({ profile, userId }) {
   const [err, setErr] = useState(null)
   const [busyId, setBusyId] = useState(null)
   const [day, setDay] = useState(null)
+  const [mode, setMode] = useState('open')          // 'wishes' | 'open'
+  const [note, setNote] = useState('')
 
   async function load() {
-    const { data, error } = await supabase.from('shift_overview').select('*').order('starts_at').order('area')
+    const [{ data, error }, { data: st }] = await Promise.all([
+      supabase.from('shift_overview').select('*').order('starts_at').order('area'),
+      supabase.from('settings').select('key,value'),
+    ])
     if (error) setErr(error.message); else setShifts(data)
+    for (const r of st ?? []) { if (r.key === 'signup_mode') setMode(r.value); if (r.key === 'assignment_note') setNote(r.value) }
   }
   useEffect(() => { load() }, [])
 
@@ -115,16 +121,20 @@ function ShiftBoard({ profile, userId }) {
 
   const total = shifts.reduce((a, s) => a + s.capacity, 0)
   const taken = shifts.reduce((a, s) => a + s.taken, 0)
+  const wishes = shifts.reduce((a, s) => a + (s.wishes ?? 0), 0)
+  const wishMode = mode === 'wishes'
 
   return (
     <Section
       title={`Hoi ${profile?.full_name?.split(' ')[0] || ''}`}
-      lead={`${taken} von ${total} Plätzen sind besetzt. Wähle eine oder mehrere Schichten – du kannst dich bis am ${EVENT.signupDeadline} jederzeit wieder abmelden.`}
+      lead={wishMode
+        ? `Wunschphase: Merke dir die Schichten, die dir passen – mehrere sind willkommen. ${note} Bisher ${wishes} Wünsche für ${total} Plätze.`
+        : `${taken} von ${total} Plätzen sind besetzt. Wähle eine oder mehrere Schichten – du kannst dich bis am ${EVENT.signupDeadline} jederzeit wieder abmelden.`}
       aside={profile?.is_admin && <Link to="/admin" className="btn btn-ghost">Admin-Übersicht</Link>}
     >
       {/* Meine Schichten */}
       <div className="rounded-2xl bg-ink text-white p-6 md:p-8">
-        <h2 className="text-2xl">Meine Schichten</h2>
+        <h2 className="text-2xl">{wishMode ? 'Meine Wunschschichten' : 'Meine Schichten'}</h2>
         {mine.length === 0 ? (
           <p className="mt-3 text-white/70">Noch keine. Wähle unten eine Schicht aus.</p>
         ) : (
@@ -134,7 +144,8 @@ function ShiftBoard({ profile, userId }) {
                 <span className="font-display font-bold text-xl text-orange">{s.area}</span>
                 <span>{fmtDay(s.day)}</span>
                 <span className="text-white/70">{fmtTime(s.starts_at)} – {fmtTime(s.ends_at)}</span>
-                <button onClick={() => toggle(s)} disabled={busyId === s.id} className="mt-2 self-start text-sm underline text-white/70 hover:text-white">Abmelden</button>
+                <span className={`mt-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold ${s.mine_status === 'confirmed' ? 'bg-rasen text-white' : 'bg-orange text-ink'}`}>{s.mine_status === 'confirmed' ? 'Zugeteilt' : 'Wunsch'}</span>
+                <button onClick={() => toggle(s)} disabled={busyId === s.id} className="mt-2 self-start text-sm underline text-white/70 hover:text-white">{s.mine_status === 'confirmed' ? 'Abmelden' : 'Wunsch entfernen'}</button>
               </li>
             ))}
           </ul>
@@ -159,7 +170,7 @@ function ShiftBoard({ profile, userId }) {
           <div key={k}>
             <h3 className="text-2xl display-wide">{fmtTime(list[0].starts_at)} – {fmtTime(list[0].ends_at)}</h3>
             <ul className="mt-3 grid gap-px bg-line border border-line sm:grid-cols-2 lg:grid-cols-3">
-              {list.map(s => <ShiftCard key={s.id} s={s} busy={busyId === s.id} onToggle={() => toggle(s)} />)}
+              {list.map(s => <ShiftCard key={s.id} s={s} wishMode={wishMode} busy={busyId === s.id} onToggle={() => toggle(s)} />)}
             </ul>
           </div>
         ))}
@@ -169,8 +180,9 @@ function ShiftBoard({ profile, userId }) {
   )
 }
 
-function ShiftCard({ s, busy, onToggle }) {
-  const full = s.free <= 0 && !s.mine
+function ShiftCard({ s, wishMode, busy, onToggle }) {
+  const full = !wishMode && s.free <= 0 && !s.mine
+  const pct = wishMode ? Math.min(100, ((s.wishes ?? 0) / s.capacity) * 100) : (s.taken / s.capacity) * 100
   return (
     <li className={`p-5 flex flex-col gap-3 ${s.mine ? 'bg-stroh' : 'bg-paper'}`}>
       <div className="flex items-start justify-between gap-3">
@@ -178,14 +190,14 @@ function ShiftCard({ s, busy, onToggle }) {
           <p className="font-display font-bold text-xl">{s.area}</p>
           {s.description && <p className="text-sm text-ink/65 mt-0.5">{s.description}</p>}
         </div>
-        <span className="shrink-0 text-sm tabular-nums text-ink/70">{s.taken}/{s.capacity}</span>
+        <span className="shrink-0 text-sm tabular-nums text-ink/70">{wishMode ? `${s.wishes ?? 0} Wünsche · ${s.capacity} Plätze` : `${s.taken}/${s.capacity}`}</span>
       </div>
       <div className="h-2 rounded-full bg-ink/10 overflow-hidden" aria-hidden="true">
-        <div className={`h-full ${s.free <= 0 ? 'bg-rasen' : 'bg-orange'}`} style={{ width: `${(s.taken / s.capacity) * 100}%` }} />
+        <div className={`h-full ${!wishMode && s.free <= 0 ? 'bg-rasen' : 'bg-orange'}`} style={{ width: `${pct}%` }} />
       </div>
       <button onClick={onToggle} disabled={busy || full}
         className={`btn !py-2 text-sm self-start ${s.mine ? 'btn-ghost' : full ? 'bg-ink/10 text-ink/50 cursor-not-allowed' : 'btn-dark'}`}>
-        {busy ? '…' : s.mine ? 'Abmelden' : full ? 'Besetzt' : 'Ich übernehme'}
+        {busy ? '…' : s.mine ? (s.mine_status === 'confirmed' ? 'Abmelden' : 'Wunsch entfernen') : full ? 'Besetzt' : wishMode ? 'Wunschschicht' : 'Ich übernehme'}
       </button>
     </li>
   )

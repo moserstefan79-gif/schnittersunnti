@@ -26,7 +26,7 @@ const Ball = ({ className }) => (
 )
 
 const menu = [
-  { land: 'England', flag: ['#fff', '#CE1124', '#fff'], claim: 'Mutterland des Fussballs', dish: 'Fish & Chips', note: 'Knusprig aus der Fritteuse, wie im Pub an der Stamford Bridge. Unser Bestseller.' },
+  { land: 'England', flag: ['#fff', '#CE1124', '#fff'], claim: 'Mutterland des Fussballs', dish: 'Fish & Chips', note: 'Knusprig aus der Fritteuse, wie im Pub an der Stamford Bridge. Unser Bestseller, CHF 18.–' },
   { land: 'Schweiz', flag: ['#DA291C', '#fff', '#DA291C'], claim: 'Heimat der FIFA – und des FCK', dish: 'Älplermagronen mit Apfelmus', note: 'Das Heimspiel auf dem Teller: Käse, Magronen, Zwiebeln, Apfelmus. Vegetarisch.' },
   { land: 'Deutschland', flag: ['#0E1114', '#DD0000', '#FFCE00'], claim: 'Viermal Weltmeister', dish: 'Fleischkäse im Mütschli & Brezel', note: 'Dazu Bier im Chübeli aus der Bierschenke – auch alkoholfrei.' },
   { land: 'Brasilien', flag: ['#009739', '#FEDD00', '#012169'], claim: 'Rekordweltmeister & Gastgeber der Frauen-WM 2027', dish: 'Batida de Coco & Ipanema', note: 'An der Brasil-Bar, mit oder ohne Alkohol. Copacabana-Stimmung bis spät.' },
@@ -195,8 +195,7 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl">Dein Einsatz<br /><span className="swoosh">im Beizli</span></h2>
             <p className="mt-5 text-ink/80 max-w-lg">
               107 Helferplätze in Theke, Küche, Service, Bar und Kasse – getragen von Mitgliedern und Freunden des
-              FC Kirchberg. Bis am {EVENT.signupDeadline} wählst du deine Wunschschicht selbst; danach teilt der
-              Vorstand die offenen Schichten den Mannschaften zu.
+              FC Kirchberg. Registriere dich jetzt und merke dir deine Wunschschichten – die Zuteilung macht das OK im Januar, danach wählst du frei, was noch offen ist.
             </p>
           </div>
           <div className="md:justify-self-end">

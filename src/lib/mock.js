@@ -9,13 +9,14 @@ const notify = () => listeners.forEach(fn => setTimeout(fn, 60))
 // ---- Daten ----
 const db = {
   profiles: [
-    { id: DEMO_USER.id, full_name: 'Stefan Moser', phone: '079 689 64 55', team: 'Vorstand', is_admin: true },
-    { id: 'u2', full_name: 'Nadine Schneider', phone: '079 000 00 02', team: '1. Mannschaft', is_admin: false },
-    { id: 'u3', full_name: 'Reto Käser', phone: '079 000 00 03', team: 'Senioren', is_admin: false },
-    { id: 'u4', full_name: 'Lea Burri', phone: '079 000 00 04', team: 'Junioren D–G (Eltern)', is_admin: false },
+    { id: DEMO_USER.id, full_name: 'Stefan Moser', phone: '079 689 64 55', team: 'Vorstand', is_admin: true, created_at: '2026-11-12T22:06:14Z' },
+    { id: 'u2', full_name: 'Nadine Schneider', phone: '079 000 00 02', team: '1. Mannschaft', is_admin: false, created_at: '2026-11-12T20:00:00Z' },
+    { id: 'u3', full_name: 'Reto Käser', phone: '079 000 00 03', team: 'Senioren', is_admin: false, created_at: '2026-11-12T20:00:00Z' },
+    { id: 'u4', full_name: 'Lea Burri', phone: '079 000 00 04', team: 'Junioren D–G (Eltern)', is_admin: false, created_at: '2026-11-12T20:00:00Z' },
   ],
   shifts: [], shift_signups: [], matches: [], tables: [], menu_categories: [], menu_items: [],
   orders: [], order_items: [], print_jobs: [], deposit_returns: [],
+  settings: [{ key: 'signup_mode', value: 'wishes' }, { key: 'assignment_note', value: 'Die Zuteilung erfolgt im Januar 2027. Bis dahin kannst du Wünsche jederzeit ändern.' }],
 }
 
 // Schichten wie im Seed
@@ -40,7 +41,7 @@ for (const [d, s, e, posts] of blocks) {
 // ein paar Anmeldungen
 const pick = (i) => db.shifts[i].id
 ;[[1, 'u2'], [1, 'u3'], [2, 'u4'], [6, 'u2'], [8, DEMO_USER.id], [20, 'u3'], [20, 'u4'], [31, DEMO_USER.id], [0, 'u2'], [0, 'u3'], [0, 'u4']]
-  .forEach(([i, u]) => db.shift_signups.push({ id: uid(), shift_id: pick(i), user_id: u, created_at: new Date().toISOString() }))
+  .forEach(([i, u], k) => db.shift_signups.push({ id: uid(), shift_id: pick(i), user_id: u, status: k % 3 === 0 ? 'confirmed' : 'wish', created_at: new Date().toISOString() }))
 
 db.matches = [
   { id: uid(), kicks_off_at: '2027-07-16T21:00:00+02:00', competition: 'Frauen-WM 2027', stage: 'Viertelfinal', home: 'Sieger Achtelfinal 1', away: 'Sieger Achtelfinal 2', note: 'Brasil-Bar bis 02:00', is_published: true },
@@ -98,8 +99,10 @@ db.orders[4].deposit_returned_chf = 2
 // ---- Views ----
 const views = {
   shift_overview: () => db.shifts.map(s => {
-    const taken = db.shift_signups.filter(x => x.shift_id === s.id).length
-    return { ...s, taken, free: s.capacity - taken, mine: db.shift_signups.some(x => x.shift_id === s.id && x.user_id === session?.user.id) }
+    const taken = db.shift_signups.filter(x => x.shift_id === s.id && x.status === 'confirmed').length
+    const wishes = db.shift_signups.filter(x => x.shift_id === s.id && x.status === 'wish').length
+    const my = db.shift_signups.find(x => x.shift_id === s.id && x.user_id === session?.user.id)
+    return { ...s, taken, wishes, free: s.capacity - taken, mine: !!my, mine_status: my?.status ?? null }
   }),
   shift_roster: () => db.shift_signups.map(su => ({ ...su, ...pickProfile(su.user_id) })),
   pickup_board: () => db.orders.filter(o => ['paid', 'in_progress', 'ready'].includes(o.status) && o.fulfillment === 'pickup').map(o => ({ number: o.number, status: o.status, fulfillment: o.fulfillment, ready_at: o.ready_at })),
@@ -127,14 +130,16 @@ class Query {
     if (this.op === 'insert') {
       const out = this.payload.map(v => ({ id: uid(), created_at: new Date().toISOString(), ...v }))
       if (this.table === 'shift_signups') for (const v of out) {
-        const s = db.shifts.find(s => s.id === v.shift_id); const taken = db.shift_signups.filter(x => x.shift_id === v.shift_id).length
-        if (taken >= s.capacity) return { data: null, error: { message: 'Schicht ist bereits voll' } }
+        const mode = db.settings.find(x => x.key === 'signup_mode').value
+        v.status = mode === 'open' ? 'confirmed' : 'wish'
+        const s = db.shifts.find(s => s.id === v.shift_id); const taken = db.shift_signups.filter(x => x.shift_id === v.shift_id && x.status === 'confirmed').length
+        if (v.status === 'confirmed' && taken >= s.capacity) return { data: null, error: { message: 'Schicht ist bereits voll' } }
       }
       if (this.table === 'deposit_returns') for (const v of out) { const o = db.orders.find(o => o.id === v.order_id); if (o) o.deposit_returned_chf = Number(o.deposit_returned_chf) + Number(v.amount_chf) }
       db[this.table].push(...out); notify(); return { data: out, error: null }
     }
     let m = rows.filter(r => this.filters.every(f => f(r)))
-    if (this.op === 'update') { m.forEach(r => Object.assign(r, this.payload)); if (this.table === 'orders' && this.payload.status === 'paid') onPaid(m); notify(); return { data: m, error: null } }
+    if (this.op === 'update') { m.forEach(r => Object.assign(r, this.table === 'settings' ? { value: JSON.parse(this.payload.value) } : this.payload)); if (this.table === 'orders' && this.payload.status === 'paid') onPaid(m); notify(); return { data: m, error: null } }
     if (this.op === 'delete') { db[this.table] = db[this.table].filter(r => !m.includes(r)); notify(); return { data: null, error: null } }
     m = m.map(r => embed(this.table, this.sel, r))
     if (this.sel.includes('orders!inner')) m = m.filter(r => this.filters.every(f => f(r)))
@@ -189,6 +194,14 @@ export const mockClient = {
       const o = db.orders.find(o => o.id === p.p_order_id && o.client_token === p.p_token)
       if (!o) return { data: [], error: null }
       return { data: [{ ...o, table_label: db.tables.find(t => t.code === o.table_code)?.label, items: db.order_items.filter(i => i.order_id === o.id).map(i => ({ name: i.name, qty: i.qty, price: i.unit_price_chf, deposit: i.deposit_chf })) }], error: null }
+    }
+    if (fn === 'assign_wishes') {
+      let c = 0, l = 0
+      for (const su of db.shift_signups.filter(x => x.status === 'wish')) {
+        const s = db.shifts.find(s => s.id === su.shift_id); const taken = db.shift_signups.filter(x => x.shift_id === su.shift_id && x.status === 'confirmed').length
+        if (taken < s.capacity) { su.status = 'confirmed'; c++ } else l++
+      }
+      notify(); return { data: [{ confirmed: c, left_open: l }], error: null }
     }
     return { data: null, error: { message: 'unbekannte Funktion ' + fn } }
   },

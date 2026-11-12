@@ -10,12 +10,37 @@ export default function Admin() {
   const [shifts, setShifts] = useState([])
   const [roster, setRoster] = useState([])
   const [filter, setFilter] = useState('alle') // alle | offen
+  const [mode, setMode] = useState('open')
+  const [profiles, setProfiles] = useState([])
+  const [msg, setMsg] = useState(null)
 
-  useEffect(() => {
-    if (!supabaseConfigured || !profile?.is_admin) return
-    supabase.from('shift_overview').select('*').order('starts_at').order('area').then(({ data }) => setShifts(data ?? []))
-    supabase.from('shift_roster').select('*').then(({ data }) => setRoster(data ?? []))
-  }, [profile])
+  async function load() {
+    const [{ data: sh }, { data: ro }, { data: st }, { data: pr }] = await Promise.all([
+      supabase.from('shift_overview').select('*').order('starts_at').order('area'),
+      supabase.from('shift_roster').select('*'),
+      supabase.from('settings').select('key,value').eq('key', 'signup_mode').maybeSingle(),
+      supabase.from('profiles').select('id, full_name, phone, team, is_admin, created_at').order('created_at', { ascending: false }),
+    ])
+    setShifts(sh ?? []); setRoster(ro ?? []); if (st) setMode(st.value); setProfiles(pr ?? [])
+  }
+  useEffect(() => { if (supabaseConfigured && profile?.is_admin) load() }, [profile])
+
+  async function switchMode(next) {
+    if (!confirm(next === 'open'
+      ? 'Phase «Zuteilung» starten? Ab jetzt sind Anmeldungen verbindlich und Plätze begrenzt.'
+      : 'Zurück zur Wunschphase? Neue Anmeldungen zählen dann wieder als Wünsche.')) return
+    await supabase.from('settings').update({ value: JSON.stringify(next) }).eq('key', 'signup_mode'); load()
+  }
+  async function assign() {
+    if (!confirm('Alle Wünsche in Reihenfolge der Anmeldung zuteilen, bis die Schichten voll sind?')) return
+    const { data, error } = await supabase.rpc('assign_wishes')
+    if (error) setMsg(error.message)
+    else setMsg(`${data[0].confirmed} Wünsche zugeteilt, ${data[0].left_open} bleiben offen (Schicht voll).`)
+    load()
+  }
+  async function setStatus(r, status) {
+    await supabase.from('shift_signups').update({ status }).eq('shift_id', r.shift_id).eq('user_id', r.user_id); load()
+  }
 
   const byShift = useMemo(() => {
     const m = {}
@@ -30,11 +55,12 @@ export default function Admin() {
   const total = shifts.reduce((a, s) => a + s.capacity, 0)
   const taken = shifts.reduce((a, s) => a + s.taken, 0)
   const helpers = new Set(roster.map(r => r.user_id)).size
+  const wishes = roster.filter(r => r.status === 'wish').length
 
   function exportCsv() {
-    const rows = [['Tag', 'Von', 'Bis', 'Posten', 'Name', 'Telefon', 'Mannschaft']]
+    const rows = [['Tag', 'Von', 'Bis', 'Posten', 'Name', 'Telefon', 'Mannschaft', 'Status']]
     for (const s of shifts) for (const r of byShift[s.id] ?? [])
-      rows.push([s.day, fmtTime(s.starts_at), fmtTime(s.ends_at), s.area, r.full_name, r.phone ?? '', r.team ?? ''])
+      rows.push([s.day, fmtTime(s.starts_at), fmtTime(s.ends_at), s.area, r.full_name, r.phone ?? '', r.team ?? '', r.status === 'confirmed' ? 'zugeteilt' : 'Wunsch'])
     const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n')
     const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }))
@@ -48,12 +74,19 @@ export default function Admin() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-4xl md:text-6xl">Schichtplan</h1>
-          <p className="mt-4 text-ink/75">{taken} von {total} Plätzen besetzt · {helpers} Helferinnen und Helfer</p>
+          <p className="mt-4 text-ink/75">{taken} von {total} Plätzen zugeteilt · {wishes} offene Wünsche · {helpers} Helferinnen und Helfer</p>
+          <p className="mt-2 text-sm">Phase: <b>{mode === 'wishes' ? 'Wunschschichten sammeln' : 'Zuteilung / verbindliche Anmeldung'}</b></p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => setFilter(f => f === 'alle' ? 'offen' : 'alle')} className="btn btn-ghost">{filter === 'alle' ? 'Nur offene zeigen' : 'Alle zeigen'}</button>
           <button onClick={exportCsv} className="btn btn-dark">CSV exportieren</button>
         </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2 items-center">
+        {mode === 'wishes'
+          ? <><button onClick={assign} className="btn btn-primary">Wünsche zuteilen</button><button onClick={() => switchMode('open')} className="btn btn-ghost">Phase «Zuteilung» starten</button></>
+          : <><button onClick={assign} className="btn btn-primary">Offene Wünsche zuteilen</button><button onClick={() => switchMode('wishes')} className="btn btn-ghost">Zurück zur Wunschphase</button></>}
+        {msg && <span className="text-sm text-rasen font-medium">{msg}</span>}
       </div>
       <div className="mt-6 flex flex-wrap gap-2 text-sm">
         <span className="text-ink/60 self-center">Betrieb am Fest:</span>
@@ -71,12 +104,43 @@ export default function Admin() {
             {visible.map(s => {
               const dayRow = s.day !== lastDay; lastDay = s.day
               return (
-                <Row key={s.id} s={s} people={byShift[s.id] ?? []} dayRow={dayRow} />
+                <Row key={s.id} s={s} people={byShift[s.id] ?? []} dayRow={dayRow} onStatus={setStatus} />
               )
             })}
           </tbody>
         </table>
       </div>
+
+      <section className="mt-16">
+        <h2 className="text-3xl">Registrierte Helferinnen und Helfer</h2>
+        <p className="mt-2 text-ink/70">{profiles.length} Konten. Name und Mannschaft sind direkt editierbar (Feld verlassen = gespeichert).</p>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-[15px]">
+            <thead className="text-left text-ink/60 border-b border-line">
+              <tr><th className="py-2 pr-4 font-medium">Name</th><th className="py-2 pr-4 font-medium">Mannschaft</th><th className="py-2 pr-4 font-medium">Telefon</th><th className="py-2 pr-4 font-medium">Schichten</th><th className="py-2 pr-4 font-medium">Registriert</th><th className="py-2 font-medium">Admin</th></tr>
+            </thead>
+            <tbody>
+              {profiles.map(p => {
+                const mine = roster.filter(r => r.user_id === p.id)
+                const patch = (f) => async (e) => { if (e.target.value !== (p[f] ?? '')) { await supabase.from('profiles').update({ [f]: e.target.value }).eq('id', p.id); load() } }
+                return (
+                  <tr key={p.id} className="border-t border-line">
+                    <td className="py-2 pr-4"><input className="field !py-1 !px-2 w-44" defaultValue={p.full_name} onBlur={patch('full_name')} /></td>
+                    <td className="py-2 pr-4"><input className="field !py-1 !px-2 w-44" defaultValue={p.team ?? ''} onBlur={patch('team')} /></td>
+                    <td className="py-2 pr-4 whitespace-nowrap">{p.phone ?? '—'}</td>
+                    <td className="py-2 pr-4 whitespace-nowrap">{mine.filter(r => r.status === 'confirmed').length} zugeteilt · {mine.filter(r => r.status === 'wish').length} Wünsche</td>
+                    <td className="py-2 pr-4 whitespace-nowrap text-ink/60">{new Date(p.created_at).toLocaleDateString('de-CH')}</td>
+                    <td className="py-2">
+                      <button onClick={async () => { if (confirm(`${p.full_name} ${p.is_admin ? 'Admin-Rechte entziehen' : 'zum Admin machen'}?`)) { await supabase.from('profiles').update({ is_admin: !p.is_admin }).eq('id', p.id); load() } }}
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${p.is_admin ? 'bg-ink text-white' : 'bg-ink/10 text-ink/60'}`}>{p.is_admin ? 'Admin' : 'Helfer'}</button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <MatchEditor />
       <OrderAdmin />
@@ -84,7 +148,7 @@ export default function Admin() {
   )
 }
 
-function Row({ s, people, dayRow }) {
+function Row({ s, people, dayRow, onStatus }) {
   return (
     <>
       {dayRow && (
@@ -95,11 +159,18 @@ function Row({ s, people, dayRow }) {
         <td className="py-3 pr-4 font-semibold">{s.area}</td>
         <td className="py-3 pr-4 whitespace-nowrap">
           <span className={`inline-block rounded-full px-2.5 py-0.5 text-sm ${s.free <= 0 ? 'bg-rasen/15 text-rasen' : 'bg-orange/20 text-orange-deep'}`}>{s.taken}/{s.capacity}</span>
+          {s.wishes > 0 && <span className="ml-1 text-xs text-ink/50">+{s.wishes} W</span>}
         </td>
         <td className="py-3">
           {people.length === 0 ? <span className="text-ink/40">—</span> : (
             <ul className="flex flex-wrap gap-x-4 gap-y-1">
-              {people.map(p => <li key={p.user_id}>{p.full_name} <span className="text-ink/50 text-sm">{p.team}{p.phone ? ` · ${p.phone}` : ''}</span></li>)}
+              {people.map(p => (
+                <li key={p.user_id} className="flex items-center gap-2">
+                  <span className={`inline-block h-2.5 w-2.5 rounded-full ${p.status === 'confirmed' ? 'bg-rasen' : 'bg-orange'}`} title={p.status === 'confirmed' ? 'zugeteilt' : 'Wunsch'} />
+                  {p.full_name} <span className="text-ink/50 text-sm">{p.team}{p.phone ? ` · ${p.phone}` : ''}</span>
+                  <button onClick={() => onStatus(p, p.status === 'confirmed' ? 'wish' : 'confirmed')} className="text-xs underline text-ink/50 hover:text-orange-deep">{p.status === 'confirmed' ? 'auf Wunsch' : 'zuteilen'}</button>
+                </li>
+              ))}
             </ul>
           )}
         </td>

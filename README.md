@@ -11,11 +11,16 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
    - `supabase/migrations/001_schema.sql` – Tabellen, Trigger, Views, RLS
    - `supabase/migrations/002_seed_shifts_2027.sql` – 42 Schichten / 107 Plätze für 16.–18. Juli 2027
    - `supabase/migrations/003_matches.sql` – Tabelle `matches` für die Spiele auf dem Screen (Admins pflegen sie unter `/admin`)
-   - `supabase/migrations/004_order_and_pay.sql` – Order & Pay: Karte 2026 (payfix-Artikelnummern), Tische, Bestellungen, Depot, Druckjobs
+   - `supabase/migrations/004_order_and_pay.sql` – Order & Pay: Karte (payfix-Artikelnummern), Tische, Bestellungen, Depot, Druckjobs
+   - `supabase/migrations/005_wish_phase.sql` – Wunschphase/Zuteilung (`settings.signup_mode`), Preise 2027
 3. **Auth**: Authentication → Providers → Email aktiviert lassen. «Confirm email» nach Wunsch (für den Vereinsgebrauch darf es auch aus sein).
    Unter Authentication → URL Configuration die Site-URL (z.B. `https://www.schnittersunnti.ch`) und `…/helfer` als Redirect eintragen.
 4. **`.env`** aus `.env.example` kopieren, `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` (Publishable Key) eintragen.
 5. `npm install && npm run dev`
+
+## Helferphasen
+
+`settings.signup_mode` = `"wishes"` (Standard bis Januar): Helfer merken sich Wunschschichten ohne Platzlimit. Admin unter `/admin`: «Wünsche zuteilen» bestätigt Wünsche in Anmeldereihenfolge bis die Schicht voll ist; «Phase «Zuteilung» starten» schaltet auf verbindliche Selbstanmeldung (`"open"`). Einzelne Wünsche lassen sich pro Person zuteilen oder zurücksetzen.
 
 ## Admin freischalten
 
