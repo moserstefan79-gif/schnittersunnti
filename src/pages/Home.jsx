@@ -4,9 +4,24 @@ import Matches from '../components/Matches.jsx'
 
 const Ball = ({ className }) => (
   <svg viewBox="0 0 64 64" className={className} aria-hidden="true">
-    <circle cx="32" cy="32" r="30" fill="#fff" stroke="#0E1114" strokeWidth="3" />
-    <polygon points="32,18 45,27 40,42 24,42 19,27" fill="#0E1114" />
-    <path d="M32 18V4M45 27l13-6M40 42l9 12M24 42l-9 12M19 27L6 21" stroke="#0E1114" strokeWidth="3" />
+    <defs>
+      <radialGradient id="ballShade" cx="38%" cy="32%" r="70%">
+        <stop offset="0" stopColor="#ffffff" />
+        <stop offset="0.75" stopColor="#e9e9e6" />
+        <stop offset="1" stopColor="#b9b9b4" />
+      </radialGradient>
+      <clipPath id="ballClip"><circle cx="32" cy="32" r="30" /></clipPath>
+    </defs>
+    <circle cx="32" cy="32" r="30" fill="url(#ballShade)" />
+    <g clipPath="url(#ballClip)" fill="#111417">
+      <polygon points="32.00,21.50 41.99,28.76 38.17,40.49 25.83,40.49 22.01,28.76" />
+      <polygon points="32.00,15.00 22.49,8.09 26.12,-3.09 37.88,-3.09 41.51,8.09" /><polygon points="48.17,26.75 51.80,15.57 63.56,15.57 67.19,26.75 57.68,33.66" /><polygon points="41.99,45.75 53.75,45.75 57.38,56.93 47.87,63.84 38.36,56.93" /><polygon points="22.01,45.75 25.64,56.93 16.13,63.84 6.62,56.93 10.25,45.75" /><polygon points="15.83,26.75 6.32,33.66 -3.19,26.75 0.44,15.57 12.20,15.57" />
+    </g>
+    <g clipPath="url(#ballClip)" stroke="#111417" strokeWidth="1.6" strokeLinecap="round" fill="none">
+      <path d="M32.00 21.50L32.00 15.00M41.99 28.76L48.17 26.75M38.17 40.49L41.99 45.75M25.83 40.49L22.01 45.75M22.01 28.76L15.83 26.75" />
+    </g>
+    <circle cx="32" cy="32" r="30" fill="none" stroke="#111417" strokeWidth="1.5" />
+    <ellipse cx="24" cy="20" rx="7" ry="4" fill="#fff" opacity="0.55" transform="rotate(-30 24 20)" />
   </svg>
 )
 
@@ -65,7 +80,7 @@ export default function Home() {
           <div className="relative">
             <img src={asset("/logo.png")} alt="Home of Football – Logo des FC Beizli" width="1000" height="1138"
               className="w-[70%] max-w-xs mx-auto md:w-full md:max-w-md drop-shadow-[0_18px_40px_rgba(255,112,0,0.25)]" fetchPriority="high" />
-            <Ball className="ball absolute -bottom-4 -right-2 md:-right-6 w-12 md:w-16" />
+            <span className="absolute -bottom-5 -right-2 md:-right-6 w-12 md:w-16 grid place-items-end" aria-hidden="true"><span className="ball-shadow block h-2 w-10 md:w-12 rounded-full bg-ink/20 blur-[2px]" /><Ball className="ball absolute bottom-1 w-12 md:w-16" /></span>
           </div>
         </div>
 
