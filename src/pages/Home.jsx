@@ -85,8 +85,8 @@ export default function Home() {
             <p className="mt-4 text-ink/80 max-w-md">Und auf dem Screen: die K.o.-Spiele der Frauen-WM 2027 – <a href="#spiele" className="underline hover:text-orange-deep">was wir zeigen</a>.</p>
             <a href={asset("/karte-2026.jpg")} target="_blank" rel="noreferrer" className="btn btn-ghost mt-6">Karte 2026 ansehen</a>
             <figure className="mt-8 max-w-md">
-              <img src={asset("/liegestuhl.jpg")} alt="Liegestuhl mit dem Home-of-Football-Logo" loading="lazy" width="1050" height="1400" className="w-full aspect-[3/4] object-cover object-[50%_60%] rounded-2xl" />
-              <figcaption className="mt-2 text-sm text-ink/60">Platz nehmen im Home of Football – unsere Liegestühle warten.</figcaption>
+              <img src={asset("/beizli-lounge.jpg")} alt="Gäste in Liegestühlen und auf Fussball-Sitzsäcken vor dem FC Beizli" loading="lazy" width="1600" height="1066" className="w-full aspect-[3/2] object-cover rounded-2xl" />
+              <figcaption className="mt-2 text-sm text-ink/60">Platz nehmen im Home of Football – Liegestühle und Fussball-Lounge im Aussenbereich.</figcaption>
             </figure>
           </div>
           <ul className="grid gap-px bg-line border border-line sm:grid-cols-2">
