@@ -176,7 +176,7 @@ export default function Home() {
           <div className="grid gap-px bg-white/20 border border-white/20 sm:grid-cols-[auto_1fr]">
             <img src={asset("/fck-wappen.jpg")} alt="Wappen FC Kirchberg BE, gegründet 1924" width="800" height="800" loading="lazy" className="w-full sm:w-56 aspect-square object-cover" />
             <dl className="bg-ink grid grid-cols-2 gap-6 p-6">
-              {[['110', 'Helferplätze'], ['3', 'Festtage'], ['4', 'Länder-Küchen'], ['1924', 'gegründet']].map(([n, l]) => (
+              {[['107', 'Helferplätze'], ['3', 'Festtage'], ['4', 'Länder-Küchen'], ['1924', 'gegründet']].map(([n, l]) => (
                 <div key={l}>
                   <dt className="text-white/60">{l}</dt>
                   <dd className="font-display font-extrabold text-4xl text-orange mt-1">{n}</dd>
@@ -194,7 +194,7 @@ export default function Home() {
           <div>
             <h2 className="text-4xl md:text-5xl">Dein Einsatz<br /><span className="swoosh">im Beizli</span></h2>
             <p className="mt-5 text-ink/80 max-w-lg">
-              110 Helferplätze in Theke, Küche, Service, Bar und Kasse – getragen von Mitgliedern und Freunden des
+              107 Helferplätze in Theke, Küche, Service, Bar und Kasse – getragen von Mitgliedern und Freunden des
               FC Kirchberg. Bis am {EVENT.signupDeadline} wählst du deine Wunschschicht selbst; danach teilt der
               Vorstand die offenen Schichten den Mannschaften zu.
             </p>
