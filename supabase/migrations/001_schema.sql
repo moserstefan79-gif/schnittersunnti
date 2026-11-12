@@ -132,3 +132,22 @@ grant select on public.shift_overview, public.shift_roster to authenticated;
 revoke execute on function public.handle_new_user() from anon, authenticated, public;
 revoke execute on function public.check_shift_capacity() from anon, authenticated, public;
 revoke execute on function public.is_admin() from anon, public;
+
+-- Admin-Allowlist: diese E-Mails werden bei der Registrierung automatisch Admin
+create table public.admin_emails (email text primary key);
+alter table public.admin_emails enable row level security;
+-- insert into public.admin_emails values ('vorstand@…');
+
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  insert into public.profiles (id, full_name, phone, team, is_admin)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'full_name', ''),
+    new.raw_user_meta_data->>'phone',
+    new.raw_user_meta_data->>'team',
+    exists (select 1 from public.admin_emails a where lower(a.email) = lower(new.email))
+  );
+  return new;
+end $$;

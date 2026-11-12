@@ -19,7 +19,7 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
 
 ## Admin freischalten
 
-Nach dem ersten Login im SQL-Editor:
+Entweder die E-Mail vorab in `public.admin_emails` eintragen (wird bei der Registrierung automatisch Admin) oder nach dem ersten Login im SQL-Editor:
 
 ```sql
 update public.profiles set is_admin = true where id = (select id from auth.users where email = 'deine@mail.ch');
