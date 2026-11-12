@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /station/
+Disallow: /tafel
+Disallow: /bestellen/status/
+Sitemap: https://www.schnittersunnti.ch/sitemap.xml
