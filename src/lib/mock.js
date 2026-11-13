@@ -15,8 +15,8 @@ const db = {
     { id: 'u4', full_name: 'Lea Burri', phone: '079 000 00 04', team: 'Junioren D–G (Eltern)', is_admin: false, helper_code: '8864', created_at: '2026-11-12T20:00:00Z' },
   ],
   shifts: [], shift_signups: [], matches: [], tables: [], menu_categories: [], menu_items: [],
-  orders: [], order_items: [], print_jobs: [], deposit_returns: [], helper_credits: [], helper_consumptions: [],
-  settings: [{ key: 'signup_mode', value: 'wishes' }, { key: 'assignment_note', value: 'Die Zuteilung erfolgt im Januar 2027. Bis dahin kannst du Wünsche jederzeit ändern.' }, { key: 'helper_credit_per_shift', value: 22 }, { key: 'helper_credit_days', value: ['2027-07-16', '2027-07-17', '2027-07-18'] }, { key: 'helper_credit_note', value: '2 Getränke + 1 Essen pro Schicht' }],
+  orders: [], order_items: [], print_jobs: [], deposit_returns: [], helper_credits: [], helper_consumptions: [], accounts: [], account_bookings: [], account_invoices: [],
+  settings: [{ key: 'signup_mode', value: 'wishes' }, { key: 'assignment_note', value: 'Die Zuteilung erfolgt im Januar 2027. Bis dahin kannst du Wünsche jederzeit ändern.' }, { key: 'helper_credit_per_shift', value: 22 }, { key: 'helper_credit_days', value: ['2027-07-16', '2027-07-17', '2027-07-18'] }, { key: 'helper_credit_note', value: '2 Getränke + 1 Essen pro Schicht' }, { key: 'invoice_iban', value: 'CH93 0076 2011 6238 5295 7' }, { key: 'invoice_creditor', value: { name: 'FC Kirchberg', street: 'Postfach', zip: '3422', city: 'Kirchberg BE' } }, { key: 'invoice_footer', value: 'Zahlbar innert 30 Tagen. Besten Dank für die Unterstützung des FC Beizli «Home of Football».' }],
 }
 
 // Schichten wie im Seed
@@ -48,6 +48,11 @@ const pick = (i) => db.shifts[i].id
 db.helper_credits.push({ id: uid(), user_id: 'u2', shift_id: db.shift_signups[0].shift_id, amount_chf: 22, reason: 'Schicht', created_by: DEMO_USER.id, created_at: new Date().toISOString() })
 db.helper_credits.push({ id: uid(), user_id: DEMO_USER.id, shift_id: null, amount_chf: 44, reason: 'Vorstand / OK', created_by: DEMO_USER.id, created_at: new Date().toISOString() })
 db.helper_consumptions.push({ id: uid(), user_id: 'u2', menu_item_id: null, name: 'Bier im Chübeli 3 dl', qty: 1, unit_price_chf: 4.5, amount_chf: 4.5, station: 'theke', booked_by: DEMO_USER.id, created_at: new Date().toISOString() })
+
+// Rechnungskonto Club 92 mit offenen Buchungen
+db.accounts.push({ id: 'a1', name: 'Club 92', code: '9201', contact: 'Präsident', street: 'Postfach', zip: '3422', city: 'Kirchberg BE', email: null, limit_chf: null, active: true, created_at: new Date().toISOString() })
+;[['Fish & Chips', 3, 18], ['Fleischkäse im Mütschli', 2, 9], ['Bier im Chübeli 3 dl', 6, 4.5]].forEach(([name, qty, price]) =>
+  db.account_bookings.push({ id: uid(), account_id: 'a1', invoice_id: null, menu_item_id: null, name, qty, unit_price_chf: price, amount_chf: qty * price, station: 'theke', consumer: 'Tisch Vorstand', booked_by: DEMO_USER.id, created_at: new Date().toISOString() }))
 
 db.matches = [
   { id: uid(), kicks_off_at: '2027-07-16T21:00:00+02:00', competition: 'Frauen-WM 2027', stage: 'Viertelfinal', home: 'Sieger Achtelfinal 1', away: 'Sieger Achtelfinal 2', note: 'Brasil-Bar bis 02:00', is_published: true },
@@ -121,6 +126,11 @@ const views = {
     const consumed = db.helper_consumptions.filter(c => c.user_id === p.id).reduce((a, c) => a + Number(c.amount_chf), 0)
     return { user_id: p.id, full_name: p.full_name, team: p.team, helper_code: p.helper_code, credited, consumed, balance: credited - consumed }
   }),
+  account_balance: () => db.accounts.map(a => {
+    const open = db.account_bookings.filter(b => b.account_id === a.id && !b.invoice_id)
+    const inv = db.account_invoices.filter(i => i.account_id === a.id)
+    return { ...a, open_chf: open.reduce((s, b) => s + Number(b.amount_chf), 0), open_items: open.length, invoiced_open_chf: inv.filter(i => i.status === 'open').reduce((s, i) => s + Number(i.total_chf), 0), paid_chf: inv.filter(i => i.status === 'paid').reduce((s, i) => s + Number(i.total_chf), 0) }
+  }),
   pickup_board: () => db.orders.filter(o => ['paid', 'in_progress', 'ready'].includes(o.status) && o.fulfillment === 'pickup').map(o => ({ number: o.number, status: o.status, fulfillment: o.fulfillment, ready_at: o.ready_at })),
 }
 const pickProfile = (id) => { const p = db.profiles.find(p => p.id === id) ?? {}; return { full_name: p.full_name, phone: p.phone, team: p.team } }
@@ -178,6 +188,7 @@ function embed(table, sel, r) {
   if (table === 'orders' && sel.includes('order_items')) out.order_items = db.order_items.filter(i => i.order_id === r.id)
   if (table === 'orders' && sel.includes('tables')) out.tables = db.tables.find(t => t.code === r.table_code) ?? null
   if (table === 'order_items' && sel.includes('orders')) out.orders = db.orders.find(o => o.id === r.order_id)
+  if (table === 'account_invoices' && sel.includes('accounts')) out.accounts = db.accounts.find(a => a.id === r.account_id) ?? null
   if (table === 'menu_items' && sel.includes('menu_categories')) out.menu_categories = db.menu_categories.find(c => c.id === r.category_id) ?? null
   return out
 }
@@ -237,6 +248,26 @@ export const mockClient = {
       }
       for (const l of lines) db.helper_consumptions.push({ id: uid(), user_id: b.user_id, menu_item_id: l.it.id, name: l.it.name + (l.it.variant ? ' ' + l.it.variant : ''), qty: l.qty, unit_price_chf: l.it.price_chf, amount_chf: Number(l.it.price_chf) * l.qty, station: p.p_station, booked_by: DEMO_USER.id, created_at: new Date().toISOString() })
       notify(); return { data: [{ balance: b.balance + topup - total, topup }], error: null }
+    }
+    if (fn === 'account_lookup') {
+      const b = views.account_balance().find(x => x.code === p.p_code && x.active)
+      if (!b) return { data: [], error: null }
+      const recent = db.account_bookings.filter(c => c.account_id === b.id).slice(-8).reverse().map(c => ({ name: c.name, qty: c.qty, amount: c.amount_chf, consumer: c.consumer, at: c.created_at }))
+      return { data: [{ account_id: b.id, name: b.name, contact: b.contact, limit_chf: b.limit_chf, open_chf: b.open_chf, recent }], error: null }
+    }
+    if (fn === 'book_account') {
+      const b = views.account_balance().find(x => x.code === p.p_code && x.active)
+      if (!b) return { data: null, error: { message: 'Code unbekannt' } }
+      let total = 0
+      for (const x of p.p_items) { const it = db.menu_items.find(i => i.id === x.item_id); total += Number(it.price_chf) * x.qty; db.account_bookings.push({ id: uid(), account_id: b.id, invoice_id: null, menu_item_id: it.id, name: it.name + (it.variant ? ' ' + it.variant : ''), qty: x.qty, unit_price_chf: it.price_chf, amount_chf: Number(it.price_chf) * x.qty, station: p.p_station, consumer: p.p_consumer || null, booked_by: DEMO_USER.id, created_at: new Date().toISOString() }) }
+      notify(); return { data: [{ open_chf: b.open_chf + total }], error: null }
+    }
+    if (fn === 'create_account_invoice') {
+      const open = db.account_bookings.filter(b => b.account_id === p.p_account && !b.invoice_id)
+      if (!open.length) return { data: null, error: { message: 'Keine offenen Buchungen' } }
+      const id = uid(); const n = db.account_invoices.length + 1; const today = new Date(); const due = new Date(Date.now() + 30 * 864e5)
+      db.account_invoices.push({ id, account_id: p.p_account, number: `${today.getFullYear()}-${String(n).padStart(2, '0')}`, issued_at: today.toISOString().slice(0, 10), due_at: due.toISOString().slice(0, 10), total_chf: open.reduce((s, b) => s + Number(b.amount_chf), 0), status: 'open', paid_at: null, created_at: today.toISOString() })
+      open.forEach(b => { b.invoice_id = id }); notify(); return { data: id, error: null }
     }
     if (fn === 'assign_wishes') {
       let c = 0, l = 0

@@ -7,7 +7,7 @@ const stops = [
   ['/helfer', 'Helfer-Login'],
   ['/bestellen/T3', 'Gast: Tisch 3'],
   ['/station/kueche', 'Küche'],
-  ['/station/theke', 'Theke & Depot'],
+  ['/station/theke', 'Theke, Helfer & Depot'],
   ['/praesenz', 'Präsenz'],
   ['/admin', 'Admin'],
 ]
@@ -16,7 +16,7 @@ export default function DemoBar() {
   const [open, setOpen] = useState(true)
   const { pathname } = useLocation()
   return (
-    <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 max-w-[96vw]">
+    <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 max-w-[96vw] print:hidden">
       {open ? (
         <div className="flex items-center gap-1 rounded-full bg-ink/90 backdrop-blur text-white px-2 py-1.5 shadow-2xl ring-1 ring-white/20 overflow-x-auto">
           <span className="px-2 text-[11px] uppercase tracking-wide text-orange font-bold whitespace-nowrap">Demo</span>

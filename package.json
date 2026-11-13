@@ -4,7 +4,8 @@
     "qrcode": "^1.5.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router-dom": "^7.18.5"
+    "react-router-dom": "^7.18.5",
+    "swissqrbill": "^4.4.4"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",

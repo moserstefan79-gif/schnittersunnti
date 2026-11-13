@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase.js'
 import { chf } from '../lib/orders.js'
 
-// Station-Tab «Helfer»: Helfercode eingeben, Artikel antippen, vom Guthaben abbuchen
+// Station-Tab «Helfer»: Code eingeben (Helfer 1000–8999 = Guthaben, Konto 9xxx = auf Rechnung), Artikel antippen, buchen
 export default function HelferKarte({ station }) {
   const [code, setCode] = useState('')
   const [helper, setHelper] = useState(null)
+  const [account, setAccount] = useState(null)
+  const [consumer, setConsumer] = useState('')
   const [items, setItems] = useState([])
   const [cart, setCart] = useState({})          // item_id -> qty
   const [msg, setMsg] = useState(null)
@@ -18,8 +20,14 @@ export default function HelferKarte({ station }) {
   }, [])
 
   async function lookup(c = code) {
-    setMsg(null); setHelper(null); setCart({})
+    setMsg(null); setHelper(null); setAccount(null); setCart({})
     if (!/^\d{4}$/.test(c)) return
+    if (c.startsWith('9')) {
+      const { data, error } = await supabase.rpc('account_lookup', { p_code: c })
+      if (error) { setMsg(error.message); return }
+      if (!data?.length) { setMsg('Kein Rechnungskonto mit diesem Code.'); return }
+      setAccount(data[0]); return
+    }
     const { data, error } = await supabase.rpc('helper_lookup', { p_code: c })
     if (error) { setMsg(error.message); return }
     if (!data?.length) { setMsg('Code unbekannt – Helfer soll sein Portal öffnen, der Code steht bei «Mein Guthaben».'); return }
@@ -46,14 +54,24 @@ export default function HelferKarte({ station }) {
     setCart({}); lookup(code)
   }
 
+  async function bookAccount() {
+    setBusy(true); setMsg(null)
+    const p_items = Object.entries(cart).map(([item_id, qty]) => ({ item_id, qty }))
+    const { data, error } = await supabase.rpc('book_account', { p_code: code, p_items, p_station: station, p_consumer: consumer })
+    setBusy(false)
+    if (error) { setMsg(error.message.replace(/^.*?:\s*/, '')); return }
+    setMsg(`Auf Rechnung gebucht: ${chf(total)} – offen jetzt ${chf(data[0].open_chf)}`)
+    setCart({}); setConsumer(''); lookup(code)
+  }
+
   const mine = items.filter(i => i.station === station)
   const others = items.filter(i => i.station !== station)
 
   return (
     <div className="p-4 grid gap-4 lg:grid-cols-[360px_1fr]">
       <div className="rounded-2xl bg-white text-ink p-5">
-        <h2 className="font-display font-bold text-xl">Helfer-Konsumationskarte</h2>
-        <p className="text-sm text-ink/60 mt-1">Helfer zeigt seinen 4-stelligen Code (im Portal unter «Mein Guthaben»).</p>
+        <h2 className="font-display font-bold text-xl">Helferkarte & Rechnung</h2>
+        <p className="text-sm text-ink/60 mt-1">Helfer zeigt seinen 4-stelligen Code (Portal, «Mein Guthaben»). Rechnungskonten haben einen Code mit 9.</p>
         <input value={code} onChange={e => onCode(e.target.value)} inputMode="numeric" placeholder="Code" autoFocus
           className="field mt-3 text-3xl tracking-[0.4em] text-center font-display font-bold" />
         {helper && (
@@ -69,7 +87,25 @@ export default function HelferKarte({ station }) {
             )}
           </div>
         )}
-        {msg && <p className={`mt-3 text-sm font-semibold ${/Abgebucht/.test(msg) ? 'text-rasen' : 'text-orange-deep'}`}>{msg}</p>}
+        {account && (
+          <div className="mt-4 rounded-xl bg-ink text-white p-4">
+            <p className="text-xs uppercase tracking-wide text-white/60">Rechnungskonto</p>
+            <p className="font-display font-bold text-lg">{account.name}</p>
+            {account.contact && <p className="text-sm text-white/70">{account.contact}</p>}
+            <p className="mt-2 text-3xl font-display font-bold">{chf(account.open_chf)} <span className="text-base font-normal text-white/60">offen</span></p>
+            {account.limit_chf != null && <p className="text-xs text-white/60">Limite {chf(account.limit_chf)}</p>}
+            <input value={consumer} onChange={e => setConsumer(e.target.value)} placeholder="Bezogen durch (optional)" className="field mt-3 !bg-white !text-ink" />
+            {account.recent?.length > 0 && (
+              <ul className="mt-3 text-xs text-white/70 space-y-0.5">
+                {account.recent.slice(0, 5).map((r, i) => <li key={i}>{r.qty}× {r.name} · {chf(r.amount)}{r.consumer ? ` · ${r.consumer}` : ''}</li>)}
+              </ul>
+            )}
+          </div>
+        )}
+        {msg && <p className={`mt-3 text-sm font-semibold ${/Abgebucht|gebucht/.test(msg) ? 'text-rasen' : 'text-orange-deep'}`}>{msg}</p>}
+        {account && (
+          <button disabled={!total || busy} onClick={bookAccount} className="btn btn-primary w-full mt-4 disabled:opacity-40">Auf Rechnung buchen {chf(total)}</button>
+        )}
         {helper && diff <= 0 && (
           <button disabled={!total || busy} onClick={() => book(false)} className="btn btn-primary w-full mt-4 disabled:opacity-40">Abbuchen {chf(total)}</button>
         )}
@@ -79,10 +115,10 @@ export default function HelferKarte({ station }) {
             <button disabled={busy} onClick={() => book(true)} className="btn btn-primary w-full mt-3">Guthaben anrechnen, {chf(diff)} kassieren</button>
           </div>
         )}
-        <p className="mt-3 text-xs text-ink/50">Kein Bargeld zurück. Restguthaben verfällt am Festende.</p>
+        {!account && <p className="mt-3 text-xs text-ink/50">Kein Bargeld zurück. Restguthaben verfällt am Festende.</p>}
       </div>
 
-      <div className={`rounded-2xl bg-white/10 p-4 ${helper ? '' : 'opacity-40 pointer-events-none'}`}>
+      <div className={`rounded-2xl bg-white/10 p-4 ${helper || account ? '' : 'opacity-40 pointer-events-none'}`}>
         {[['Diese Station', mine], ['Andere Stationen', others]].map(([label, list]) => list.length > 0 && (
           <div key={label} className="mb-4">
             <p className="text-xs uppercase tracking-wide text-white/60 mb-2">{label}</p>
