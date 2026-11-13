@@ -9,14 +9,14 @@ const notify = () => listeners.forEach(fn => setTimeout(fn, 60))
 // ---- Daten ----
 const db = {
   profiles: [
-    { id: DEMO_USER.id, full_name: 'Stefan Moser', phone: '079 689 64 55', team: 'Vorstand', is_admin: true, created_at: '2026-11-12T22:06:14Z' },
-    { id: 'u2', full_name: 'Nadine Schneider', phone: '079 000 00 02', team: '1. Mannschaft', is_admin: false, created_at: '2026-11-12T20:00:00Z' },
-    { id: 'u3', full_name: 'Reto Käser', phone: '079 000 00 03', team: 'Senioren', is_admin: false, created_at: '2026-11-12T20:00:00Z' },
-    { id: 'u4', full_name: 'Lea Burri', phone: '079 000 00 04', team: 'Junioren D–G (Eltern)', is_admin: false, created_at: '2026-11-12T20:00:00Z' },
+    { id: DEMO_USER.id, full_name: 'Stefan Moser', phone: '079 689 64 55', team: 'Vorstand', is_admin: true, helper_code: '4711', created_at: '2026-11-12T22:06:14Z' },
+    { id: 'u2', full_name: 'Nadine Schneider', phone: '079 000 00 02', team: '1. Mannschaft', is_admin: false, helper_code: '2203', created_at: '2026-11-12T20:00:00Z' },
+    { id: 'u3', full_name: 'Reto Käser', phone: '079 000 00 03', team: 'Senioren', is_admin: false, helper_code: '3150', created_at: '2026-11-12T20:00:00Z' },
+    { id: 'u4', full_name: 'Lea Burri', phone: '079 000 00 04', team: 'Junioren D–G (Eltern)', is_admin: false, helper_code: '8864', created_at: '2026-11-12T20:00:00Z' },
   ],
   shifts: [], shift_signups: [], matches: [], tables: [], menu_categories: [], menu_items: [],
-  orders: [], order_items: [], print_jobs: [], deposit_returns: [],
-  settings: [{ key: 'signup_mode', value: 'wishes' }, { key: 'assignment_note', value: 'Die Zuteilung erfolgt im Januar 2027. Bis dahin kannst du Wünsche jederzeit ändern.' }],
+  orders: [], order_items: [], print_jobs: [], deposit_returns: [], helper_credits: [], helper_consumptions: [],
+  settings: [{ key: 'signup_mode', value: 'wishes' }, { key: 'assignment_note', value: 'Die Zuteilung erfolgt im Januar 2027. Bis dahin kannst du Wünsche jederzeit ändern.' }, { key: 'helper_credit_per_shift', value: 22 }, { key: 'helper_credit_days', value: ['2027-07-16', '2027-07-17', '2027-07-18'] }, { key: 'helper_credit_note', value: '2 Getränke + 1 Essen pro Schicht' }],
 }
 
 // Schichten wie im Seed
@@ -44,6 +44,11 @@ const pick = (i) => db.shifts[i].id
 ;[[1, 'u2'], [1, 'u3'], [2, 'u4'], [6, 'u2'], [8, DEMO_USER.id], [20, 'u3'], [20, 'u4'], [31, DEMO_USER.id], [0, 'u2'], [0, 'u3'], [0, 'u4']]
   .forEach(([i, u], k) => db.shift_signups.push({ id: uid(), shift_id: pick(i), user_id: u, status: k % 3 === 0 ? 'confirmed' : 'wish', attendance: k === 0 ? 'present' : null, checked_at: null, checked_by: null, created_at: new Date().toISOString() }))
 
+// Helfer-Konsumationskarte: Nadine hat eine Schicht geleistet und ein Bier bezogen
+db.helper_credits.push({ id: uid(), user_id: 'u2', shift_id: db.shift_signups[0].shift_id, amount_chf: 22, reason: 'Schicht', created_by: DEMO_USER.id, created_at: new Date().toISOString() })
+db.helper_credits.push({ id: uid(), user_id: DEMO_USER.id, shift_id: null, amount_chf: 44, reason: 'Vorstand / OK', created_by: DEMO_USER.id, created_at: new Date().toISOString() })
+db.helper_consumptions.push({ id: uid(), user_id: 'u2', menu_item_id: null, name: 'Bier im Chübeli 3 dl', qty: 1, unit_price_chf: 4.5, amount_chf: 4.5, station: 'theke', booked_by: DEMO_USER.id, created_at: new Date().toISOString() })
+
 db.matches = [
   { id: uid(), kicks_off_at: '2027-07-16T21:00:00+02:00', competition: 'Frauen-WM 2027', stage: 'Viertelfinal', home: 'Sieger Achtelfinal 1', away: 'Sieger Achtelfinal 2', note: 'Brasil-Bar bis 02:00', is_published: true },
   { id: uid(), kicks_off_at: '2027-07-17T22:00:00+02:00', competition: 'Frauen-WM 2027', stage: 'Viertelfinal', home: 'Brasilien', away: 'offen', note: 'Caipirinha-Happy-Hour', is_published: true },
@@ -57,9 +62,9 @@ const cats = [['Essen', 'kueche'], ['Getränke', 'theke'], ['Bierschenke', 'thek
 cats.forEach(([name, station], i) => db.menu_categories.push({ id: 'c' + i, name, sort: i + 1, station }))
 const C = (n) => db.menu_categories.find(c => c.name === n)
 const items = [
-  ['Essen', 103, 'Fish & Chips', null, null, 16, 0], ['Essen', 101, 'Älplermagronen mit Apfelmus', null, 'vegetarisch', 12, 0], ['Essen', 102, 'Fleischkäse im Mütschli', null, null, 9, 0], ['Essen', 104, 'Chips', 'einzeln', null, 6, 0],
-  ['Bierschenke', 301, 'Bier im Chübeli', '3 dl', null, 4, 2], ['Bierschenke', 302, 'Alkoholfreies Bier', '5 dl', null, 4.5, 2], ['Bierschenke', 303, 'Brezel', null, null, 4, 0],
-  ['Getränke', 401, 'Mineralwasser ohne', 'PET 5 dl', null, 4.5, 0], ['Getränke', 402, 'Mineralwasser mit', 'PET 5 dl', null, 4.5, 0], ['Getränke', 403, 'Eistee', 'PET 5 dl', null, 4.5, 0], ['Getränke', 404, 'Rivella rot', 'PET 5 dl', null, 4.5, 0], ['Getränke', 405, 'Pepsi zero', 'PET 5 dl', null, 4.5, 0], ['Getränke', 501, 'Kaffee', null, null, 4, 0],
+  ['Essen', 103, 'Fish & Chips', null, null, 18, 0], ['Essen', 101, 'Älplermagronen mit Apfelmus', null, 'vegetarisch', 12, 0], ['Essen', 102, 'Fleischkäse im Mütschli', null, null, 9, 0], ['Essen', 104, 'Chips', 'einzeln', null, 6, 0],
+  ['Bierschenke', 301, 'Bier im Chübeli', '3 dl', null, 4.5, 2], ['Bierschenke', 302, 'Alkoholfreies Bier', '5 dl', null, 5, 2], ['Bierschenke', 303, 'Brezel', null, null, 4, 0],
+  ['Getränke', 401, 'Mineralwasser ohne', 'PET 5 dl', null, 5, 0], ['Getränke', 402, 'Mineralwasser mit', 'PET 5 dl', null, 5, 0], ['Getränke', 403, 'Eistee', 'PET 5 dl', null, 5, 0], ['Getränke', 404, 'Rivella rot', 'PET 5 dl', null, 5, 0], ['Getränke', 405, 'Pepsi zero', 'PET 5 dl', null, 5, 0], ['Getränke', 501, 'Kaffee', null, null, 4, 0],
   ['Wein', 201, 'Weisswein Legio Julius', 'Glas 1 dl', 'Chasselas-Arvine-Arneis (CH)', 5, 2], ['Wein', 202, 'Weisswein Legio Julius', 'Flasche 75 cl', null, 35, 2],
   ['Wein', 205, 'Roséwein Legio Julius', 'Glas 1 dl', 'Pinot Noir-Lagrein (CH)', 5, 2], ['Wein', 206, 'Roséwein Legio Julius', 'Flasche 75 cl', null, 35, 2],
   ['Wein', 203, 'Rotwein Legio Julius', 'Glas 1 dl', 'Merlot-Primitivo (CH)', 5, 2], ['Wein', 204, 'Rotwein Legio Julius', 'Flasche 75 cl', null, 35, 2],
@@ -111,6 +116,11 @@ const views = {
     const hrs = mine.filter(su => su.attendance === 'present').reduce((a, su) => { const s = db.shifts.find(x => x.id === su.shift_id); return a + (new Date(s.ends_at) - new Date(s.starts_at)) / 36e5 }, 0)
     return { user_id: p.id, full_name: p.full_name, team: p.team, phone: p.phone, assigned: mine.filter(su => su.status === 'confirmed').length, present: mine.filter(su => su.attendance === 'present').length, absent: mine.filter(su => su.attendance === 'absent').length, hours_present: hrs.toFixed(1) }
   }),
+  helper_balance: () => db.profiles.map(p => {
+    const credited = db.helper_credits.filter(c => c.user_id === p.id).reduce((a, c) => a + Number(c.amount_chf), 0)
+    const consumed = db.helper_consumptions.filter(c => c.user_id === p.id).reduce((a, c) => a + Number(c.amount_chf), 0)
+    return { user_id: p.id, full_name: p.full_name, team: p.team, helper_code: p.helper_code, credited, consumed, balance: credited - consumed }
+  }),
   pickup_board: () => db.orders.filter(o => ['paid', 'in_progress', 'ready'].includes(o.status) && o.fulfillment === 'pickup').map(o => ({ number: o.number, status: o.status, fulfillment: o.fulfillment, ready_at: o.ready_at })),
 }
 const pickProfile = (id) => { const p = db.profiles.find(p => p.id === id) ?? {}; return { full_name: p.full_name, phone: p.phone, team: p.team } }
@@ -145,7 +155,13 @@ class Query {
       db[this.table].push(...out); notify(); return { data: out, error: null }
     }
     let m = rows.filter(r => this.filters.every(f => f(r)))
-    if (this.op === 'update') { m.forEach(r => Object.assign(r, this.table === 'settings' ? { value: JSON.parse(this.payload.value) } : this.payload)); if (this.table === 'orders' && this.payload.status === 'paid') onPaid(m); notify(); return { data: m, error: null } }
+    if (this.op === 'update') { m.forEach(r => Object.assign(r, this.table === 'settings' ? { value: JSON.parse(this.payload.value) } : this.payload));
+      if (this.table === 'shift_signups' && 'attendance' in this.payload) for (const su of m) {
+        const s = db.shifts.find(x => x.id === su.shift_id); const days = db.settings.find(x => x.key === 'helper_credit_days').value
+        const has = db.helper_credits.find(c => c.user_id === su.user_id && c.shift_id === su.shift_id)
+        if (su.attendance === 'present' && !has && days.includes(s.day)) db.helper_credits.push({ id: uid(), user_id: su.user_id, shift_id: su.shift_id, amount_chf: Number(db.settings.find(x => x.key === 'helper_credit_per_shift').value), reason: 'Schicht', created_by: DEMO_USER.id, created_at: new Date().toISOString() })
+        if (su.attendance !== 'present' && has) db.helper_credits = db.helper_credits.filter(c => c !== has)
+      } if (this.table === 'orders' && this.payload.status === 'paid') onPaid(m); notify(); return { data: m, error: null } }
     if (this.op === 'delete') { db[this.table] = db[this.table].filter(r => !m.includes(r)); notify(); return { data: null, error: null } }
     m = m.map(r => embed(this.table, this.sel, r))
     if (this.sel.includes('orders!inner')) m = m.filter(r => this.filters.every(f => f(r)))
@@ -162,6 +178,7 @@ function embed(table, sel, r) {
   if (table === 'orders' && sel.includes('order_items')) out.order_items = db.order_items.filter(i => i.order_id === r.id)
   if (table === 'orders' && sel.includes('tables')) out.tables = db.tables.find(t => t.code === r.table_code) ?? null
   if (table === 'order_items' && sel.includes('orders')) out.orders = db.orders.find(o => o.id === r.order_id)
+  if (table === 'menu_items' && sel.includes('menu_categories')) out.menu_categories = db.menu_categories.find(c => c.id === r.category_id) ?? null
   return out
 }
 function onPaid(orders) {
@@ -200,6 +217,26 @@ export const mockClient = {
       const o = db.orders.find(o => o.id === p.p_order_id && o.client_token === p.p_token)
       if (!o) return { data: [], error: null }
       return { data: [{ ...o, table_label: db.tables.find(t => t.code === o.table_code)?.label, items: db.order_items.filter(i => i.order_id === o.id).map(i => ({ name: i.name, qty: i.qty, price: i.unit_price_chf, deposit: i.deposit_chf })) }], error: null }
+    }
+    if (fn === 'helper_lookup') {
+      const b = views.helper_balance().find(x => x.helper_code === p.p_code)
+      if (!b) return { data: [], error: null }
+      const recent = db.helper_consumptions.filter(c => c.user_id === b.user_id).slice(-8).reverse().map(c => ({ name: c.name, qty: c.qty, amount: c.amount_chf, at: c.created_at }))
+      return { data: [{ ...b, recent }], error: null }
+    }
+    if (fn === 'book_helper_consumption') {
+      const b = views.helper_balance().find(x => x.helper_code === p.p_code)
+      if (!b) return { data: null, error: { message: 'Code unbekannt' } }
+      const lines = p.p_items.map(x => ({ it: db.menu_items.find(i => i.id === x.item_id), qty: x.qty }))
+      const total = lines.reduce((a, l) => a + Number(l.it.price_chf) * l.qty, 0)
+      let topup = 0
+      if (total > b.balance + 0.001) {
+        if (!p.p_topup) return { data: null, error: { message: `Guthaben reicht nicht (noch ${b.balance.toFixed(2)} Fr.)` } }
+        topup = Math.round((total - b.balance) * 100) / 100
+        db.helper_credits.push({ id: uid(), user_id: b.user_id, shift_id: null, amount_chf: topup, reason: 'Aufzahlung bar/Karte', created_by: DEMO_USER.id, created_at: new Date().toISOString() })
+      }
+      for (const l of lines) db.helper_consumptions.push({ id: uid(), user_id: b.user_id, menu_item_id: l.it.id, name: l.it.name + (l.it.variant ? ' ' + l.it.variant : ''), qty: l.qty, unit_price_chf: l.it.price_chf, amount_chf: Number(l.it.price_chf) * l.qty, station: p.p_station, booked_by: DEMO_USER.id, created_at: new Date().toISOString() })
+      notify(); return { data: [{ balance: b.balance + topup - total, topup }], error: null }
     }
     if (fn === 'assign_wishes') {
       let c = 0, l = 0

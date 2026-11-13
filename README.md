@@ -14,6 +14,7 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
    - `supabase/migrations/004_order_and_pay.sql` – Order & Pay: Karte (payfix-Artikelnummern), Tische, Bestellungen, Depot, Druckjobs
    - `supabase/migrations/005_wish_phase.sql` – Wunschphase/Zuteilung (`settings.signup_mode`), Preise 2027
    - `supabase/migrations/006_attendance.sql` – Anwesenheitskontrolle, Einsatzbilanz
+   - `supabase/migrations/007_helper_credits.sql` – Helfer-Konsumationskarte (Guthaben, Abbuchung, Aufzahlung)
 3. **Auth**: Authentication → Providers → Email aktiviert lassen. «Confirm email» nach Wunsch (für den Vereinsgebrauch darf es auch aus sein).
    Unter Authentication → URL Configuration die Site-URL (z.B. `https://www.schnittersunnti.ch`) und `…/helfer` als Redirect eintragen.
 4. **`.env`** aus `.env.example` kopieren, `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` (Publishable Key) eintragen.
@@ -26,6 +27,10 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
 ## Präsenz am Fest
 
 `/praesenz` (Admin, fürs Handy): pro Tag und Block die zugeteilten Helfer mit ✓ / ✕. Helfer sehen danach im Portal «✓ Einsatz bestätigt» und eine Einsatzbestätigung mit Stunden (als PDF druckbar). Im Admin erscheint die «Einsatzbilanz für den Vorstand» nach Mannschaft mit CSV-Export.
+
+## Helfer-Konsumationskarte
+
+Pro geleistete Schicht an einem Festtag (Fr/Sa/So, `settings.helper_credit_days`) erhält der Helfer ein Guthaben (`settings.helper_credit_per_shift`, Standard CHF 22.– = 2 Getränke + 1 Essen). Die Gutschrift erfolgt automatisch mit dem ✓ in `/praesenz`; Donnerstag (Aufbau) und Montag (Abbau) geben kein Guthaben. Der Helfer sieht Saldo und seinen 4-stelligen Code im Portal unter «Mein Guthaben». An jeder Station (`/station/...` → Tab **Helfer**) wird der Code eingegeben, Artikel angetippt und abgebucht. Reicht das Guthaben nicht, bucht die Station «Guthaben anrechnen» und kassiert den Rest bar/Karte (als «Aufzahlung» verbucht). Kein Bargeld zurück, Rest verfällt am Festende. Admin: Regel, manuelle Gutschriften (Vorstand/OK, Gäste), Auswertung nach Artikel und Mannschaft, CSV.
 
 ## Admin freischalten
 

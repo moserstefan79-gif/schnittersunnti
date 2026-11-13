@@ -4,6 +4,7 @@ import { useAuth } from '../components/AuthProvider.jsx'
 import { supabase, supabaseConfigured, fmtTime, fmtDay } from '../lib/supabase.js'
 import MatchEditor from '../components/MatchEditor.jsx'
 import OrderAdmin from '../components/OrderAdmin.jsx'
+import HelferKonsum from '../components/HelferKonsum.jsx'
 
 export default function Admin() {
   const { profile, loading, session } = useAuth()
@@ -145,6 +146,7 @@ export default function Admin() {
       </section>
 
       <Einsatzbilanz summary={summary} roster={roster} shifts={shifts} />
+      <HelferKonsum profiles={profiles} userId={session?.user?.id} />
 
       <MatchEditor />
       <OrderAdmin />

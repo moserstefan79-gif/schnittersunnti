@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider.jsx'
 import AuthForm from '../components/AuthForm.jsx'
 import { supabase, supabaseConfigured, fmtTime, fmtDay, EVENT, asset } from '../lib/supabase.js'
+import { chf } from '../lib/orders.js'
 
 const areaOrder = ['Aufbau', 'Theke', 'Küche', 'Service', 'Bar', 'Kasse', 'Abbau']
 
@@ -81,14 +82,21 @@ function ShiftBoard({ profile, userId }) {
   const [day, setDay] = useState(null)
   const [mode, setMode] = useState('open')          // 'wishes' | 'open'
   const [note, setNote] = useState('')
+  const [credit, setCredit] = useState({ amount: 0, note: '' })
+  const [balance, setBalance] = useState(null)
+  const [consumed, setConsumed] = useState([])
 
   async function load() {
-    const [{ data, error }, { data: st }] = await Promise.all([
+    const [{ data, error }, { data: st }, { data: bal }, { data: cons }] = await Promise.all([
       supabase.from('shift_overview').select('*').order('starts_at').order('area'),
       supabase.from('settings').select('key,value'),
+      supabase.from('helper_balance').select('*').eq('user_id', userId).maybeSingle(),
+      supabase.from('helper_consumptions').select('name, qty, amount_chf, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(10),
     ])
     if (error) setErr(error.message); else setShifts(data)
-    for (const r of st ?? []) { if (r.key === 'signup_mode') setMode(r.value); if (r.key === 'assignment_note') setNote(r.value) }
+    const c = { ...credit }
+    for (const r of st ?? []) { if (r.key === 'signup_mode') setMode(r.value); if (r.key === 'assignment_note') setNote(r.value); if (r.key === 'helper_credit_per_shift') c.amount = Number(r.value); if (r.key === 'helper_credit_note') c.note = r.value }
+    setCredit(c); setBalance(bal ?? null); setConsumed(cons ?? [])
   }
   useEffect(() => { load() }, [])
 
@@ -142,6 +150,30 @@ function ShiftBoard({ profile, userId }) {
             {mine.filter(s => s.mine_attendance === 'present').reduce((a, s) => a + (new Date(s.ends_at) - new Date(s.starts_at)) / 36e5, 0).toFixed(1).replace('.0', '')} Stunden im Home of Football – bestätigt vom OK FC Beizli.
           </p>
           <button onClick={() => window.print()} className="mt-4 btn bg-white text-rasen !py-2 text-sm print:hidden">Als PDF sichern</button>
+        </div>
+      )}
+
+      {/* Helfer-Konsumationskarte */}
+      {balance && (
+        <div className="mb-6 rounded-2xl bg-stroh p-6 md:p-8 grid gap-6 md:grid-cols-[1fr_auto] items-center print:hidden">
+          <div>
+            <p className="text-sm text-ink/60">Mein Guthaben · Helfer-Konsumationskarte</p>
+            <p className="font-display font-bold text-4xl mt-1">{chf(balance.balance)}</p>
+            <p className="mt-2 text-ink/80 max-w-prose">
+              {Number(balance.credited) > 0
+                ? <>Gutgeschrieben {chf(balance.credited)}, bezogen {chf(balance.consumed)}. Zeig deinen Code an der Theke, in der Küche oder an der Bar – dort wird abgebucht. Gültig während des ganzen Fests.</>
+                : <>Pro geleistete Schicht am Freitag, Samstag oder Sonntag gibt es {chf(credit.amount)} Guthaben ({credit.note}). Es wird freigeschaltet, sobald das OK deine Schicht als geleistet bestätigt hat.</>}
+            </p>
+            {consumed.length > 0 && (
+              <ul className="mt-3 text-sm text-ink/70 space-y-0.5">
+                {consumed.slice(0, 5).map((r, i) => <li key={i}>{r.qty}× {r.name} · {chf(r.amount_chf)}</li>)}
+              </ul>
+            )}
+          </div>
+          <div className="rounded-2xl bg-ink text-white px-6 py-4 text-center justify-self-start md:justify-self-end">
+            <p className="text-xs uppercase tracking-wide text-white/60">Mein Code</p>
+            <p className="font-display font-bold text-4xl tracking-[0.3em] pl-[0.3em]">{balance.helper_code}</p>
+          </div>
         </div>
       )}
 

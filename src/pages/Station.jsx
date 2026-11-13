@@ -4,6 +4,7 @@ import { supabase, supabaseConfigured, asset } from '../lib/supabase.js'
 import { useAuth } from '../components/AuthProvider.jsx'
 import AuthForm from '../components/AuthForm.jsx'
 import { chf } from '../lib/orders.js'
+import HelferKarte from '../components/HelferKarte.jsx'
 
 const STATIONS = { kueche: 'Küche', theke: 'Theke', bar: 'Brasil-Bar' }
 
@@ -18,7 +19,7 @@ export default function Station() {
 
 function Board({ station, userId }) {
   const [orders, setOrders] = useState([])
-  const [tab, setTab] = useState('offen')   // offen | bereit | depot
+  const [tab, setTab] = useState('offen')   // offen | bereit | helfer | depot
   const [clock, setClock] = useState(Date.now())
 
   async function load() {
@@ -71,12 +72,12 @@ function Board({ station, userId }) {
       </header>
 
       <div className="px-4 pt-4 flex gap-2">
-        {[['offen', `Offen (${open.length})`], ['bereit', `Bereit (${done.length})`], ...(station === 'theke' ? [['depot', 'Depot']] : [])].map(([k, l]) => (
+        {[['offen', `Offen (${open.length})`], ['bereit', `Bereit (${done.length})`], ['helfer', 'Helfer'], ...(station === 'theke' ? [['depot', 'Depot']] : [])].map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} className={`btn !py-2 ${tab === k ? 'btn-primary' : 'border border-white/30 text-white'}`}>{l}</button>
         ))}
       </div>
 
-      {tab === 'depot' ? <Depot userId={userId} /> : (
+      {tab === 'depot' ? <Depot userId={userId} /> : tab === 'helfer' ? <HelferKarte station={station} /> : (
         <ul className="p-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {(tab === 'offen' ? open : done).length === 0 && <li className="text-white/50">Nichts offen.</li>}
           {(tab === 'offen' ? open : done).map(o => {
