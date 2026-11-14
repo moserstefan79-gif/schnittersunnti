@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Navigate, Link } from 'react-router-dom'
+import { Navigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider.jsx'
 import { supabase, supabaseConfigured, fmtTime, fmtDay } from '../lib/supabase.js'
 import MatchEditor from '../components/MatchEditor.jsx'
@@ -16,13 +16,16 @@ export default function Admin() {
   const [profiles, setProfiles] = useState([])
   const [summary, setSummary] = useState([])
   const [msg, setMsg] = useState(null)
+  const [params, setParams] = useSearchParams()
+  const tab = params.get('tab') ?? 'uebersicht'
+  const go = (t) => setParams(t === 'uebersicht' ? {} : { tab: t })
 
   async function load() {
     const [{ data: sh }, { data: ro }, { data: st }, { data: pr }] = await Promise.all([
       supabase.from('shift_overview').select('*').order('starts_at').order('area'),
       supabase.from('shift_roster').select('*'),
       supabase.from('settings').select('key,value').eq('key', 'signup_mode').maybeSingle(),
-      supabase.from('profiles').select('id, full_name, phone, team, is_admin, created_at').order('created_at', { ascending: false }),
+      supabase.from('profiles').select('id, full_name, phone, team, is_admin, created_at, helper_code').order('created_at', { ascending: false }),
     ])
     setShifts(sh ?? []); setRoster(ro ?? []); if (st) setMode(st.value); setProfiles(pr ?? [])
     const { data: su } = await supabase.from('helper_summary').select('*').order('full_name'); setSummary(su ?? [])
@@ -73,85 +76,158 @@ export default function Admin() {
   }
 
   let lastDay = null
+  const tabs = [
+    ['uebersicht', 'Übersicht'],
+    ['schichten', 'Schichtplan'],
+    ['helfende', 'Helfende'],
+    ['konsum', 'Konsum & Rechnungen'],
+    ['karte', 'Karte & Tische'],
+    ['spiele', 'Spiele'],
+  ]
+  const openShifts = shifts.filter(s => s.free > 0).length
+  const checked = roster.filter(r => r.attendance).length
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 md:py-16">
+    <div className="mx-auto max-w-6xl px-4 py-10 md:py-14">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-4xl md:text-6xl">Schichtplan</h1>
-          <p className="mt-4 text-ink/75">{taken} von {total} Plätzen zugeteilt · {wishes} offene Wünsche · {helpers} Helferinnen und Helfer</p>
-          <p className="mt-2 text-sm">Phase: <b>{mode === 'wishes' ? 'Wunschschichten sammeln' : 'Zuteilung / verbindliche Anmeldung'}</b></p>
+          <p className="text-sm uppercase tracking-wide text-orange-deep font-bold">Admin · FC Beizli</p>
+          <h1 className="text-4xl md:text-5xl mt-1">{tabs.find(t => t[0] === tab)?.[1] ?? 'Übersicht'}</h1>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setFilter(f => f === 'alle' ? 'offen' : 'alle')} className="btn btn-ghost">{filter === 'alle' ? 'Nur offene zeigen' : 'Alle zeigen'}</button>
-          <button onClick={exportCsv} className="btn btn-dark">CSV exportieren</button>
+        <div className="flex flex-wrap gap-2 text-sm">
+          <span className="text-ink/60 self-center">Am Fest:</span>
+          {[['/praesenz', 'Präsenz'], ['/station/kueche', 'Küche'], ['/station/theke', 'Theke'], ['/station/bar', 'Bar'], ['/bestellen', 'Gast']].map(([to, l]) => (
+            <Link key={to} to={to} target="_blank" className="btn btn-ghost !py-1.5 !px-3">{l}</Link>
+          ))}
         </div>
       </div>
-      <div className="mt-4 flex flex-wrap gap-2 items-center">
-        {mode === 'wishes'
-          ? <><button onClick={assign} className="btn btn-primary">Wünsche zuteilen</button><button onClick={() => switchMode('open')} className="btn btn-ghost">Phase «Zuteilung» starten</button></>
-          : <><button onClick={assign} className="btn btn-primary">Offene Wünsche zuteilen</button><button onClick={() => switchMode('wishes')} className="btn btn-ghost">Zurück zur Wunschphase</button></>}
-        {msg && <span className="text-sm text-rasen font-medium">{msg}</span>}
-      </div>
-      <div className="mt-6 flex flex-wrap gap-2 text-sm">
-        <span className="text-ink/60 self-center">Betrieb am Fest:</span>
-        {[['/praesenz', 'Präsenzkontrolle'], ['/station/kueche', 'Küche'], ['/station/theke', 'Theke & Depot'], ['/station/bar', 'Brasil-Bar'], ['/bestellen', 'Gast-Ansicht']].map(([to, l]) => (
-          <Link key={to} to={to} target="_blank" className="btn btn-ghost !py-1.5">{l}</Link>
-        ))}
-      </div>
 
-      <div className="mt-10 overflow-x-auto">
-        <table className="w-full text-[15px]">
-          <thead className="text-left text-ink/60 border-b border-line">
-            <tr><th className="py-2 pr-4 font-medium">Zeit</th><th className="py-2 pr-4 font-medium">Posten</th><th className="py-2 pr-4 font-medium">Belegt</th><th className="py-2 font-medium">Wer</th></tr>
-          </thead>
-          <tbody>
-            {visible.map(s => {
-              const dayRow = s.day !== lastDay; lastDay = s.day
-              return (
-                <Row key={s.id} s={s} people={byShift[s.id] ?? []} dayRow={dayRow} onStatus={setStatus} />
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      <section className="mt-16">
-        <h2 className="text-3xl">Registrierte Helferinnen und Helfer</h2>
-        <p className="mt-2 text-ink/70">{profiles.length} Konten. Name und Mannschaft sind direkt editierbar (Feld verlassen = gespeichert).</p>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-[15px]">
-            <thead className="text-left text-ink/60 border-b border-line">
-              <tr><th className="py-2 pr-4 font-medium">Name</th><th className="py-2 pr-4 font-medium">Mannschaft</th><th className="py-2 pr-4 font-medium">Telefon</th><th className="py-2 pr-4 font-medium">Schichten</th><th className="py-2 pr-4 font-medium">Registriert</th><th className="py-2 font-medium">Admin</th></tr>
-            </thead>
-            <tbody>
-              {profiles.map(p => {
-                const mine = roster.filter(r => r.user_id === p.id)
-                const patch = (f) => async (e) => { if (e.target.value !== (p[f] ?? '')) { await supabase.from('profiles').update({ [f]: e.target.value }).eq('id', p.id); load() } }
-                return (
-                  <tr key={p.id} className="border-t border-line">
-                    <td className="py-2 pr-4"><input className="field !py-1 !px-2 w-44" defaultValue={p.full_name} onBlur={patch('full_name')} /></td>
-                    <td className="py-2 pr-4"><input className="field !py-1 !px-2 w-44" defaultValue={p.team ?? ''} onBlur={patch('team')} /></td>
-                    <td className="py-2 pr-4 whitespace-nowrap">{p.phone ?? '—'}</td>
-                    <td className="py-2 pr-4 whitespace-nowrap">{mine.filter(r => r.status === 'confirmed').length} zugeteilt · {mine.filter(r => r.status === 'wish').length} Wünsche</td>
-                    <td className="py-2 pr-4 whitespace-nowrap text-ink/60">{new Date(p.created_at).toLocaleDateString('de-CH')}</td>
-                    <td className="py-2">
-                      <button onClick={async () => { if (confirm(`${p.full_name} ${p.is_admin ? 'Admin-Rechte entziehen' : 'zum Admin machen'}?`)) { await supabase.from('profiles').update({ is_admin: !p.is_admin }).eq('id', p.id); load() } }}
-                        className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${p.is_admin ? 'bg-ink text-white' : 'bg-ink/10 text-ink/60'}`}>{p.is_admin ? 'Admin' : 'Helfer'}</button>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+      <nav className="sticky top-0 z-30 -mx-4 px-4 mt-6 bg-white/90 backdrop-blur border-b border-line">
+        <div className="flex gap-1 overflow-x-auto py-2">
+          {tabs.map(([k, l]) => (
+            <button key={k} onClick={() => go(k)} className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${tab === k ? 'bg-ink text-white' : 'text-ink/70 hover:bg-ink/5'}`}>{l}</button>
+          ))}
         </div>
-      </section>
+      </nav>
 
-      <Einsatzbilanz summary={summary} roster={roster} shifts={shifts} />
-      <HelferKonsum profiles={profiles} userId={session?.user?.id} />
-      <Rechnungskonten />
+      {tab === 'uebersicht' && (
+        <div className="mt-8">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ['Plätze zugeteilt', `${taken} / ${total}`, `${openShifts} Schichten mit freien Plätzen`, 'schichten'],
+              ['Offene Wünsche', wishes, mode === 'wishes' ? 'Zuteilung im Januar' : 'noch nicht zugeteilt', 'schichten'],
+              ['Registrierte Helfende', profiles.length, `${helpers} mit Schicht oder Wunsch`, 'helfende'],
+              ['Phase', mode === 'wishes' ? 'Wünsche' : 'Zuteilung', mode === 'wishes' ? 'Helfer tragen Wunschschichten ein' : 'verbindliche Anmeldung', 'schichten'],
+            ].map(([l, v, sub, t]) => (
+              <button key={l} onClick={() => go(t)} className="text-left rounded-2xl bg-stroh p-5 hover:-translate-y-0.5 transition">
+                <p className="text-sm text-ink/60">{l}</p>
+                <p className="font-display font-bold text-3xl mt-1">{v}</p>
+                <p className="text-xs text-ink/60 mt-1">{sub}</p>
+              </button>
+            ))}
+          </div>
 
-      <MatchEditor />
-      <OrderAdmin />
+          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-2xl border border-line p-6">
+              <h2 className="font-display font-bold text-xl">Nächste Schritte</h2>
+              <ol className="mt-3 space-y-2 text-[15px]">
+                {[
+                  [mode === 'wishes', 'Bis Januar: Helfende registrieren sich und tragen Wunschschichten ein.'],
+                  [true, 'Januar: «Wünsche zuteilen», dann «Phase Zuteilung starten» – danach Helfende informieren.'],
+                  [true, 'Vor dem Fest: Karte und Preise prüfen, Tische mit QR drucken, IBAN für Rechnungen hinterlegen.'],
+                  [true, 'Am Fest: Präsenzkontrolle auf dem Handy – gibt automatisch das Helferguthaben frei.'],
+                  [true, 'Nach dem Fest: Einsatzbilanz, Helferkonsum und Rechnungen für den Vorstand.'],
+                ].map(([on, t], i) => <li key={i} className={`flex gap-3 ${on ? '' : 'text-ink/40'}`}><span className="font-display font-bold text-orange-deep">{i + 1}</span><span>{t}</span></li>)}
+              </ol>
+            </div>
+            <div className="rounded-2xl border border-line p-6">
+              <h2 className="font-display font-bold text-xl">Phase steuern</h2>
+              <p className="mt-2 text-sm text-ink/70">Aktuell: <b>{mode === 'wishes' ? 'Wunschschichten sammeln' : 'Zuteilung / verbindliche Anmeldung'}</b></p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {mode === 'wishes'
+                  ? <><button onClick={assign} className="btn btn-primary">Wünsche zuteilen</button><button onClick={() => switchMode('open')} className="btn btn-ghost">Phase «Zuteilung» starten</button></>
+                  : <><button onClick={assign} className="btn btn-primary">Offene Wünsche zuteilen</button><button onClick={() => switchMode('wishes')} className="btn btn-ghost">Zurück zur Wunschphase</button></>}
+              </div>
+              {msg && <p className="mt-3 text-sm text-rasen font-medium">{msg}</p>}
+              <p className="mt-6 text-sm text-ink/70">{checked > 0 ? `${checked} Präsenzen erfasst – Einsatzbilanz unter «Helfende».` : 'Noch keine Präsenzen erfasst.'}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === 'schichten' && (
+        <div className="mt-8">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-ink/75">{taken} von {total} Plätzen zugeteilt · {wishes} offene Wünsche · <span className="inline-block h-2.5 w-2.5 rounded-full bg-rasen align-middle" /> zugeteilt <span className="inline-block h-2.5 w-2.5 rounded-full bg-orange align-middle ml-2" /> Wunsch</p>
+            <div className="flex flex-wrap gap-2">
+              {mode === 'wishes' ? <button onClick={assign} className="btn btn-primary !py-2">Wünsche zuteilen</button> : <button onClick={assign} className="btn btn-primary !py-2">Offene Wünsche zuteilen</button>}
+              <button onClick={() => setFilter(f => f === 'alle' ? 'offen' : 'alle')} className="btn btn-ghost !py-2">{filter === 'alle' ? 'Nur offene zeigen' : 'Alle zeigen'}</button>
+              <button onClick={exportCsv} className="btn btn-dark !py-2">CSV</button>
+            </div>
+          </div>
+          {msg && <p className="mt-3 text-sm text-rasen font-medium">{msg}</p>}
+          <p className="mt-2 text-xs text-ink/50">Schichten ändern (Zeiten, Plätze, Posten): Supabase → Tabelle «shifts».</p>
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full text-[15px]">
+              <thead className="text-left text-ink/60 border-b border-line">
+                <tr><th className="py-2 pr-4 font-medium">Zeit</th><th className="py-2 pr-4 font-medium">Posten</th><th className="py-2 pr-4 font-medium">Belegt</th><th className="py-2 font-medium">Wer</th></tr>
+              </thead>
+              <tbody>
+                {visible.map(s => {
+                  const dayRow = s.day !== lastDay; lastDay = s.day
+                  return <Row key={s.id} s={s} people={byShift[s.id] ?? []} dayRow={dayRow} onStatus={setStatus} />
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {tab === 'helfende' && (
+        <>
+          <section className="mt-8">
+            <p className="text-ink/70">{profiles.length} Konten. Name und Mannschaft sind direkt editierbar (Feld verlassen = gespeichert).</p>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-[15px]">
+                <thead className="text-left text-ink/60 border-b border-line">
+                  <tr><th className="py-2 pr-4 font-medium">Name</th><th className="py-2 pr-4 font-medium">Mannschaft</th><th className="py-2 pr-4 font-medium">Telefon</th><th className="py-2 pr-4 font-medium">Code</th><th className="py-2 pr-4 font-medium">Schichten</th><th className="py-2 pr-4 font-medium">Registriert</th><th className="py-2 font-medium">Admin</th></tr>
+                </thead>
+                <tbody>
+                  {profiles.map(p => {
+                    const mine = roster.filter(r => r.user_id === p.id)
+                    const patch = (f) => async (e) => { if (e.target.value !== (p[f] ?? '')) { await supabase.from('profiles').update({ [f]: e.target.value }).eq('id', p.id); load() } }
+                    return (
+                      <tr key={p.id} className="border-t border-line">
+                        <td className="py-2 pr-4"><input className="field !py-1 !px-2 w-44" defaultValue={p.full_name} onBlur={patch('full_name')} /></td>
+                        <td className="py-2 pr-4"><input className="field !py-1 !px-2 w-44" defaultValue={p.team ?? ''} onBlur={patch('team')} /></td>
+                        <td className="py-2 pr-4 whitespace-nowrap">{p.phone ?? '—'}</td>
+                        <td className="py-2 pr-4 font-display font-bold tracking-widest">{p.helper_code ?? '—'}</td>
+                        <td className="py-2 pr-4 whitespace-nowrap">{mine.filter(r => r.status === 'confirmed').length} zugeteilt · {mine.filter(r => r.status === 'wish').length} Wünsche</td>
+                        <td className="py-2 pr-4 whitespace-nowrap text-ink/60">{new Date(p.created_at).toLocaleDateString('de-CH')}</td>
+                        <td className="py-2">
+                          <button onClick={async () => { if (confirm(`${p.full_name} ${p.is_admin ? 'Admin-Rechte entziehen' : 'zum Admin machen'}?`)) { await supabase.from('profiles').update({ is_admin: !p.is_admin }).eq('id', p.id); load() } }}
+                            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${p.is_admin ? 'bg-ink text-white' : 'bg-ink/10 text-ink/60'}`}>{p.is_admin ? 'Admin' : 'Helfer'}</button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <Einsatzbilanz summary={summary} roster={roster} shifts={shifts} />
+        </>
+      )}
+
+      {tab === 'konsum' && (
+        <>
+          <HelferKonsum profiles={profiles} userId={session?.user?.id} />
+          <Rechnungskonten />
+        </>
+      )}
+
+      {tab === 'karte' && <OrderAdmin />}
+      {tab === 'spiele' && <MatchEditor />}
     </div>
   )
 }

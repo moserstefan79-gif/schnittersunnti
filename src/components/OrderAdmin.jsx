@@ -27,7 +27,7 @@ function MenuAdmin() {
   async function patch(id, p) { await supabase.from('menu_items').update(p).eq('id', id); load() }
 
   return (
-    <section className="mt-16">
+    <section className="mt-10">
       <h2 className="text-3xl">Karte</h2>
       <p className="mt-2 text-ink/70">Artikel ausblenden, wenn etwas ausgeht. Preise und Depot direkt ändern. Artikelnummern entsprechen dem payfix-Stamm.</p>
       {cats.map(c => (

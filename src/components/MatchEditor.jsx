@@ -33,7 +33,7 @@ export default function MatchEditor() {
   }
 
   return (
-    <section className="mt-16">
+    <section className="mt-10">
       <h2 className="text-3xl">Spiele auf dem Screen</h2>
       <p className="mt-2 text-ink/70">Was hier steht, erscheint auf der Startseite unter «Live auf dem Screen». Zeiten in Schweizer Zeit.</p>
 

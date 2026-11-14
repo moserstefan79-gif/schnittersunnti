@@ -57,7 +57,7 @@ export default function Rechnungskonten() {
   const invPaid = invoices.filter(i => i.status === 'paid').reduce((a, i) => a + Number(i.total_chf), 0)
 
   return (
-    <section className="mt-16">
+    <section className="mt-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 className="text-3xl">Rechnungskonten</h2>
