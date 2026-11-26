@@ -215,6 +215,30 @@ export default function Home() {
             <p className="mt-3 text-sm text-ink/70">Mit Login – deine Schichten bleiben für dich sichtbar.</p>
           </div>
         </div>
+
+        {/* Aufruf Juniorinnen und Junioren */}
+        <div className="mx-auto max-w-6xl px-4 pb-16 md:pb-20">
+          <div className="relative rounded-3xl bg-ink text-white p-7 md:p-10 grid gap-6 md:grid-cols-[1fr_auto] items-center overflow-hidden">
+            <span className="sticker absolute -top-3 -right-3 md:top-5 md:right-8 bg-rasen text-white rotate-6">ab 12 Jahren</span>
+            <div>
+              <p className="text-orange font-bold uppercase tracking-wide text-sm">Juniorinnen und Junioren</p>
+              <h3 className="font-display font-bold text-3xl md:text-4xl mt-1 leading-tight">Du spielst beim FCK? Dann hilf mit – im Beizli deines Clubs.</h3>
+              <p className="mt-4 text-white/80 max-w-xl">
+                Ab 12 Jahren darfst du mithelfen: in der Küche oder im Service – Essen an die Tische bringen, abräumen, Becher einsammeln.
+                Die Junioren-Schichten dauern drei bis vier Stunden und enden spätestens um 20 Uhr.
+              </p>
+              <ul className="mt-5 grid gap-2 sm:grid-cols-3 text-sm">
+                {[['Samstag & Sonntag', '8 Schichten, 23 Plätze'], ['Bis 20 Uhr', 'Küche oder Service'], ['CHF 22.– Guthaben', 'Essen und Getränke pro Schicht']].map(([t, d]) => (
+                  <li key={t} className="rounded-xl bg-white/10 px-3 py-2"><p className="font-semibold">{t}</p><p className="text-white/60 text-xs">{d}</p></li>
+                ))}
+              </ul>
+              <p className="mt-4 text-xs text-white/50">Eltern registrieren sich mit ihrem Konto und geben beim Eintragen den Namen des Kindes an. Mit dem Team zusammen? Tragt euch für dieselbe Schicht ein.</p>
+            </div>
+            <div className="md:justify-self-end">
+              <Link to="/helfer?junioren=1" className="btn btn-primary text-lg">Junioren-Schichten ansehen</Link>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Partner */}

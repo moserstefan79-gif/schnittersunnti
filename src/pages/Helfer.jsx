@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider.jsx'
 import AuthForm from '../components/AuthForm.jsx'
 import { supabase, supabaseConfigured, fmtTime, fmtDay, EVENT, asset } from '../lib/supabase.js'
@@ -100,7 +100,8 @@ function ShiftBoard({ profile, userId }) {
   }
   useEffect(() => { load() }, [])
 
-  const [juniorOnly, setJuniorOnly] = useState(false)
+  const [params] = useSearchParams()
+  const [juniorOnly, setJuniorOnly] = useState(params.get('junioren') === '1')
   const juniorCount = shifts.filter(s => s.junior_ok).length
   const days = useMemo(() => [...new Set(shifts.filter(s => !juniorOnly || s.junior_ok).map(s => s.day))], [shifts, juniorOnly])
   const activeDay = days.includes(day) ? day : days[0]
