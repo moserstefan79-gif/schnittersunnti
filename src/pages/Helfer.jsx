@@ -100,10 +100,12 @@ function ShiftBoard({ profile, userId }) {
   }
   useEffect(() => { load() }, [])
 
-  const days = useMemo(() => [...new Set(shifts.map(s => s.day))], [shifts])
-  const activeDay = day ?? days[0]
+  const [juniorOnly, setJuniorOnly] = useState(false)
+  const juniorCount = shifts.filter(s => s.junior_ok).length
+  const days = useMemo(() => [...new Set(shifts.filter(s => !juniorOnly || s.junior_ok).map(s => s.day))], [shifts, juniorOnly])
+  const activeDay = days.includes(day) ? day : days[0]
   const mine = shifts.filter(s => s.mine)
-  const visible = shifts.filter(s => s.day === activeDay)
+  const visible = shifts.filter(s => s.day === activeDay && (!juniorOnly || s.junior_ok))
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at) || areaOrder.indexOf(a.area) - areaOrder.indexOf(b.area))
 
   const groups = useMemo(() => {
@@ -118,9 +120,15 @@ function ShiftBoard({ profile, userId }) {
 
   async function toggle(s) {
     setBusyId(s.id); setErr(null)
+    let note = null
+    if (!s.mine && s.junior_ok) {
+      const who = window.prompt('Wer übernimmt diese Schicht? Name der Juniorin / des Juniors – leer lassen, wenn du selbst kommst.')
+      if (who === null) { setBusyId(null); return }
+      note = who.trim() || null
+    }
     const q = s.mine
       ? supabase.from('shift_signups').delete().eq('shift_id', s.id).eq('user_id', userId)
-      : supabase.from('shift_signups').insert({ shift_id: s.id, user_id: userId })
+      : supabase.from('shift_signups').insert({ shift_id: s.id, user_id: userId, note })
     const { error } = await q
     if (error) setErr(/voll/i.test(error.message) ? 'Diese Schicht ist inzwischen voll.' : error.message)
     await load()
@@ -210,6 +218,15 @@ function ShiftBoard({ profile, userId }) {
           </button>
         ))}
       </div>
+      {juniorCount > 0 && (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button onClick={() => setJuniorOnly(v => !v)} aria-pressed={juniorOnly}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold border transition ${juniorOnly ? 'bg-rasen text-white border-rasen' : 'bg-white border-line hover:border-rasen'}`}>
+            <JuniorIcon /> Nur Junioren-Schichten ({juniorCount})
+          </button>
+          <p className="text-sm text-ink/60">Schichten mit «ab 12 Jahren» eignen sich für Juniorinnen und Junioren – Küche und Service, Schluss spätestens um 20 Uhr. Eltern melden sich mit ihrem Konto an und geben beim Eintragen den Namen des Kindes an.</p>
+        </div>
+      )}
 
       {err && <p className="mt-6 rounded-lg bg-orange/15 text-orange-deep px-4 py-3">{err}</p>}
 
@@ -229,6 +246,10 @@ function ShiftBoard({ profile, userId }) {
   )
 }
 
+function JuniorIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3.5" /><path d="M5 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2" /><path d="M9 4.5 7 3M15 4.5 17 3" /></svg>
+}
+
 function ShiftCard({ s, wishMode, busy, onToggle }) {
   const full = !wishMode && s.free <= 0 && !s.mine
   const pct = wishMode ? Math.min(100, ((s.wishes ?? 0) / s.capacity) * 100) : (s.taken / s.capacity) * 100
@@ -238,6 +259,7 @@ function ShiftCard({ s, wishMode, busy, onToggle }) {
         <div>
           <p className="font-display font-bold text-xl">{s.area}</p>
           {s.description && <p className="text-sm text-ink/65 mt-0.5">{s.description}</p>}
+          {s.junior_ok && <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-rasen/10 text-rasen px-2.5 py-0.5 text-xs font-semibold"><JuniorIcon /> ab 12 Jahren</span>}
         </div>
         <span className="shrink-0 text-sm tabular-nums text-ink/70">{wishMode ? `${s.wishes ?? 0} Wünsche · ${s.capacity} Plätze` : `${s.taken}/${s.capacity}`}</span>
       </div>

@@ -17,6 +17,7 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
    - `supabase/migrations/007_helper_credits.sql` – Helfer-Konsumationskarte (Guthaben, Abbuchung, Aufzahlung)
    - `supabase/migrations/008_accounts.sql` – Rechnungskonten (Konsumation auf Rechnung, Rechnungen mit QR-Zahlteil)
    - `supabase/migrations/009_analytics_notify.sql` – Besucherzähler (cookiefrei) und Push-Meldung bei Registrierung (ntfy via pg_net)
+   - `supabase/migrations/010_junior_shifts.sql` – Junioren-Schichten (`junior_ok`)
 3. **Auth**: Authentication → Providers → Email aktiviert lassen. «Confirm email» nach Wunsch (für den Vereinsgebrauch darf es auch aus sein).
    Unter Authentication → URL Configuration die Site-URL (z.B. `https://www.schnittersunnti.ch`) und `…/helfer` als Redirect eintragen.
 4. **`.env`** aus `.env.example` kopieren, `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` (Publishable Key) eintragen.
@@ -25,6 +26,10 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
 ## Helferphasen
 
 `settings.signup_mode` = `"wishes"` (Standard bis Januar): Helfer merken sich Wunschschichten ohne Platzlimit. Admin unter `/admin`: «Wünsche zuteilen» bestätigt Wünsche in Anmeldereihenfolge bis die Schicht voll ist; «Phase «Zuteilung» starten» schaltet auf verbindliche Selbstanmeldung (`"open"`). Einzelne Wünsche lassen sich pro Person zuteilen oder zurücksetzen.
+
+## Junioren-Schichten
+
+`shifts.junior_ok` markiert Schichten für Juniorinnen und Junioren ab 12 Jahren (Küche und Service, Schluss spätestens 20 Uhr; Migration 010 setzt sie automatisch). Im Portal erscheinen sie mit «ab 12 Jahren» und lassen sich filtern; beim Eintragen fragt das Portal nach dem Namen des Kindes (landet in `shift_signups.note`, im Admin sichtbar). Admin → Schichtplan: «ab 12» pro Schicht per Klick umschalten.
 
 ## Präsenz am Fest
 

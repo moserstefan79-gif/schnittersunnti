@@ -46,6 +46,9 @@ export default function Admin() {
     else setMsg(`${data[0].confirmed} Wünsche zugeteilt, ${data[0].left_open} bleiben offen (Schicht voll).`)
     load()
   }
+  async function toggleJunior(s) {
+    await supabase.from('shifts').update({ junior_ok: !s.junior_ok }).eq('id', s.id); load()
+  }
   async function setStatus(r, status) {
     await supabase.from('shift_signups').update({ status }).eq('shift_id', r.shift_id).eq('user_id', r.user_id); load()
   }
@@ -168,7 +171,7 @@ export default function Admin() {
             </div>
           </div>
           {msg && <p className="mt-3 text-sm text-rasen font-medium">{msg}</p>}
-          <p className="mt-2 text-xs text-ink/50">Schichten ändern (Zeiten, Plätze, Posten): Supabase → Tabelle «shifts».</p>
+          <p className="mt-2 text-xs text-ink/50">«ab 12» = Junioren-Schicht (Küche/Service bis 20 Uhr) – per Klick umschalten. Zeiten, Plätze, Posten: Supabase → Tabelle «shifts».</p>
           <div className="mt-6 overflow-x-auto">
             <table className="w-full text-[15px]">
               <thead className="text-left text-ink/60 border-b border-line">
@@ -177,7 +180,7 @@ export default function Admin() {
               <tbody>
                 {visible.map(s => {
                   const dayRow = s.day !== lastDay; lastDay = s.day
-                  return <Row key={s.id} s={s} people={byShift[s.id] ?? []} dayRow={dayRow} onStatus={setStatus} />
+                  return <Row key={s.id} s={s} people={byShift[s.id] ?? []} dayRow={dayRow} onStatus={setStatus} onJunior={toggleJunior} />
                 })}
               </tbody>
             </table>
@@ -234,7 +237,7 @@ export default function Admin() {
   )
 }
 
-function Row({ s, people, dayRow, onStatus }) {
+function Row({ s, people, dayRow, onStatus, onJunior }) {
   return (
     <>
       {dayRow && (
@@ -242,7 +245,10 @@ function Row({ s, people, dayRow, onStatus }) {
       )}
       <tr className="border-t border-line align-top">
         <td className="py-3 pr-4 whitespace-nowrap tabular-nums">{fmtTime(s.starts_at)} – {fmtTime(s.ends_at)}</td>
-        <td className="py-3 pr-4 font-semibold">{s.area}</td>
+        <td className="py-3 pr-4 font-semibold">{s.area}
+          <button onClick={() => onJunior(s)} title="Für Junioren ab 12 geeignet – klicken zum Umschalten"
+            className={`ml-2 rounded-full px-2 py-0.5 text-[11px] font-semibold align-middle ${s.junior_ok ? 'bg-rasen/10 text-rasen' : 'bg-ink/5 text-ink/30 hover:text-ink/60'}`}>ab 12</button>
+        </td>
         <td className="py-3 pr-4 whitespace-nowrap">
           <span className={`inline-block rounded-full px-2.5 py-0.5 text-sm ${s.free <= 0 ? 'bg-rasen/15 text-rasen' : 'bg-orange/20 text-orange-deep'}`}>{s.taken}/{s.capacity}</span>
           {s.wishes > 0 && <span className="ml-1 text-xs text-ink/50">+{s.wishes} W</span>}
@@ -253,7 +259,7 @@ function Row({ s, people, dayRow, onStatus }) {
               {people.map(p => (
                 <li key={p.user_id} className="flex items-center gap-2">
                   <span className={`inline-block h-2.5 w-2.5 rounded-full ${p.status === 'confirmed' ? 'bg-rasen' : 'bg-orange'}`} title={p.status === 'confirmed' ? 'zugeteilt' : 'Wunsch'} />
-                  {p.full_name} <span className="text-ink/50 text-sm">{p.team}{p.phone ? ` · ${p.phone}` : ''}</span>
+                  {p.full_name} <span className="text-ink/50 text-sm">{p.team}{p.phone ? ` · ${p.phone}` : ''}{p.note ? ` · für ${p.note}` : ''}</span>
                   <button onClick={() => onStatus(p, p.status === 'confirmed' ? 'wish' : 'confirmed')} className="text-xs underline text-ink/50 hover:text-orange-deep">{p.status === 'confirmed' ? 'auf Wunsch' : 'zuteilen'}</button>
                 </li>
               ))}

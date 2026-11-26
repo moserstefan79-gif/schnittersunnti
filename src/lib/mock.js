@@ -37,7 +37,7 @@ const blocks = [
 for (const [d, s, e, posts] of blocks) {
   const end = e > s ? d : new Date(new Date(d + 'T12:00:00Z').getTime() + 864e5).toISOString().slice(0, 10)
   for (const [area, description, capacity] of posts)
-    db.shifts.push({ id: uid(), day: d, starts_at: `${d}T${s}:00+02:00`, ends_at: `${end}T${e}:00+02:00`, area, description, capacity })
+    db.shifts.push({ id: uid(), day: d, starts_at: `${d}T${s}:00+02:00`, ends_at: `${end}T${e}:00+02:00`, area, description, capacity, junior_ok: ['Küche', 'Service'].includes(area) && end === d && e <= '20:30' && d >= '2027-07-16' && d <= '2027-07-18' })
 }
 // ein paar Anmeldungen
 const pick = (i) => db.shifts[i].id
