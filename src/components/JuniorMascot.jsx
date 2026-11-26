@@ -11,16 +11,23 @@ export default function JuniorMascot({ className = '' }) {
 
       {/* Ball mit Bewegungslinien */}
       <g className="jm-ball">
-        <circle cx="128" cy="86" r="14" fill={paper} stroke={ink} strokeWidth="3" />
-        <path d="M128 75.5l7.6 5.5-2.9 9h-9.4l-2.9-9z" fill={ink} />
-        <path d="M128 75.5v-3.5M135.6 81l3.4-1.6M132.7 90l2.4 3.2M123.3 90l-2.4 3.2M120.4 81l-3.4-1.6" stroke={ink} strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx="133" cy="78" r="14" fill={paper} stroke={ink} strokeWidth="3" />
+        <path d="M133 67.5l7.6 5.5-2.9 9h-9.4l-2.9-9z" fill={ink} />
+        <path d="M133 67.5v-3.5M140.6 73l3.4-1.6M137.7 82l2.4 3.2M128.3 82l-2.4 3.2M125.4 73l-3.4-1.6" stroke={ink} strokeWidth="2.5" strokeLinecap="round" />
       </g>
-      <path d="M108 112h12M104 120h8" stroke={ink} strokeWidth="2.5" strokeLinecap="round" opacity=".35" />
+      <path d="M112 104h12M108 112h8" stroke={ink} strokeWidth="2.5" strokeLinecap="round" opacity=".35" />
 
-      {/* Hinteres Bein (Standbein) */}
-      <path d="M58 92l-6 26" stroke={ink} strokeWidth="11" strokeLinecap="round" />
-      <path d="M40 122h20" stroke={orange} strokeWidth="9" strokeLinecap="round" />
-      <path d="M40 122h20" stroke={ink} strokeWidth="2.5" strokeLinecap="round" fill="none" opacity=".0" />
+      {/* Standbein: Haut mit Kontur, Stulpen, Schuh */}
+      <path d="M54 94l-5 24" stroke={ink} strokeWidth="13" strokeLinecap="round" />
+      <path d="M54 94l-5 24" stroke={skin} strokeWidth="8" strokeLinecap="round" />
+      <path d="M50.5 110l-1.5 8" stroke={ink} strokeWidth="13" strokeLinecap="round" />
+      <path d="M50.5 110l-1.5 8" stroke={paper} strokeWidth="8" strokeLinecap="round" />
+      <path d="M51 109.5l-.6 3" stroke={orange} strokeWidth="8" strokeLinecap="butt" />
+      <g transform="translate(43 119)">
+        <path d="M-1 -1h15c3.5 0 6 2.5 6 6v2c0 1.5-1 2.5-2.5 2.5H-4c-3 0-5-2-5-5s2-5.5 5-5.5z" fill={orange} stroke={ink} strokeWidth="3" strokeLinejoin="round" />
+        <path d="M-7 7.5h26" stroke={paper} strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M3 1l2 4M8 0l2 4" stroke={ink} strokeWidth="1.8" strokeLinecap="round" />
+      </g>
 
       {/* Rumpf / Trikot */}
       <path d="M46 60c4-6 24-6 28 0l4 32c-10 5-26 5-36 0z" fill={paper} stroke={ink} strokeWidth="3" strokeLinejoin="round" />
@@ -29,9 +36,21 @@ export default function JuniorMascot({ className = '' }) {
       <path d="M54 60c3 3 9 3 12 0" stroke={ink} strokeWidth="2.5" strokeLinecap="round" fill="none" />
       <text x="60" y="84" textAnchor="middle" fontFamily="Bricolage Grotesque, Figtree, sans-serif" fontWeight="800" fontSize="17" fill={orange} stroke={ink} strokeWidth=".6">12</text>
 
-      {/* Schussbein (vorne) */}
-      <path d="M68 92l18 10 18-14" stroke={ink} strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <path d="M98 92l14-10" stroke={orange} strokeWidth="9" strokeLinecap="round" />
+      {/* Shorts */}
+      <path d="M44 90h32l3 12H63l-3-5-3 5H42z" fill={ink} stroke={ink} strokeWidth="3" strokeLinejoin="round" />
+      <path d="M48 93l-2 8M72 93l2 8" stroke={orange} strokeWidth="2" strokeLinecap="round" />
+
+      {/* Schussbein: Oberschenkel, Knie, Unterschenkel, Stulpen, Schuh Richtung Ball */}
+      <path d="M70 98l18 8 16-14" stroke={ink} strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M70 98l18 8 16-14" stroke={skin} strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M97 98l7-6" stroke={ink} strokeWidth="14" strokeLinecap="round" />
+      <path d="M97 98l7-6" stroke={paper} strokeWidth="9" strokeLinecap="round" />
+      <path d="M96.5 98.5l2-1.8" stroke={orange} strokeWidth="9" strokeLinecap="butt" />
+      <g transform="translate(104 91) rotate(-48)">
+        <path d="M-1 -1h15c3.5 0 6 2.5 6 6v2c0 1.5-1 2.5-2.5 2.5H-4c-3 0-5-2-5-5s2-5.5 5-5.5z" fill={orange} stroke={ink} strokeWidth="3" strokeLinejoin="round" />
+        <path d="M-7 7.5h26" stroke={paper} strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M3 1l2 4M8 0l2 4" stroke={ink} strokeWidth="1.8" strokeLinecap="round" />
+      </g>
 
       {/* Arme */}
       <path d="M46 66L26 52" stroke={ink} strokeWidth="9" strokeLinecap="round" />

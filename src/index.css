@@ -123,6 +123,6 @@ h1, h2, h3, .display {
 @keyframes wiggle { 0%,100% { transform: rotate(-6deg);} 50% { transform: rotate(-3deg);} }
 .sticker { animation: wiggle 3s ease-in-out infinite; }
   .mascot { transform-origin: 50% 100%; animation: mascot-hop 2.4s ease-in-out infinite; }
-  .mascot .jm-ball { transform-origin: 128px 86px; animation: mascot-ball 2.4s ease-in-out infinite; }
+  .mascot .jm-ball { transform-origin: 133px 78px; animation: mascot-ball 2.4s ease-in-out infinite; }
   @keyframes mascot-hop { 0%, 100% { transform: rotate(-3deg) } 50% { transform: rotate(3deg) translateY(-2px) } }
   @keyframes mascot-ball { 0%, 100% { transform: rotate(0) } 50% { transform: rotate(25deg) translate(2px, -4px) } }
