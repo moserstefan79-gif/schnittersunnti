@@ -16,6 +16,7 @@ Stack: Vite + React + Tailwind v4 + Supabase (Auth, Postgres, RLS).
    - `supabase/migrations/006_attendance.sql` – Anwesenheitskontrolle, Einsatzbilanz
    - `supabase/migrations/007_helper_credits.sql` – Helfer-Konsumationskarte (Guthaben, Abbuchung, Aufzahlung)
    - `supabase/migrations/008_accounts.sql` – Rechnungskonten (Konsumation auf Rechnung, Rechnungen mit QR-Zahlteil)
+   - `supabase/migrations/009_analytics_notify.sql` – Besucherzähler (cookiefrei) und Push-Meldung bei Registrierung (ntfy via pg_net)
 3. **Auth**: Authentication → Providers → Email aktiviert lassen. «Confirm email» nach Wunsch (für den Vereinsgebrauch darf es auch aus sein).
    Unter Authentication → URL Configuration die Site-URL (z.B. `https://www.schnittersunnti.ch`) und `…/helfer` als Redirect eintragen.
 4. **`.env`** aus `.env.example` kopieren, `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` (Publishable Key) eintragen.
@@ -36,6 +37,10 @@ Pro geleistete Schicht an einem Festtag (Fr/Sa/So, `settings.helper_credit_days`
 ## Rechnungskonten (Konsumation auf Rechnung)
 
 Admin → «Rechnungskonten» → «Neues Konto» (z.B. Club 92, mit Adresse und optionaler Limite). Das Konto erhält einen Code 9xxx. An der Station (Tab **Helfer**) Code eingeben, Artikel antippen, optional «Bezogen durch», «Auf Rechnung buchen». Nach dem Fest im Admin «Rechnung erstellen» → alle offenen Buchungen werden zur Rechnung JJJJ-NN zusammengefasst; `/rechnung/<id>` zeigt die A4-Rechnung mit Schweizer QR-Zahlteil (swissqrbill) zum Drucken/PDF. Zahlungseingang mit «Bezahlt» abhaken. IBAN, Zahlungsempfänger und Schlusstext unter «Zahlungsangaben» hinterlegen – ohne gültige IBAN wird die Rechnung ohne QR-Teil gedruckt. Kein MwSt-Ausweis (Verein).
+
+## Besucherzähler & Benachrichtigungen
+
+`src/lib/track.js` zählt Aufrufe öffentlicher Seiten über `track_view` (zufällige Sitzungs-ID in sessionStorage, keine IP, keine Cookies; gleiche Seite/Sitzung innerhalb 30 min nur einmal). Auswertung in Admin → Übersicht («Besucher»). Bei jeder neuen Registrierung ruft der Trigger `profiles_notify` über pg_net `https://ntfy.sh` auf (Thema in `settings.notify_ntfy_topic`, Schalter `notify_on_register`). Vorstand: ntfy-App installieren und das Thema abonnieren – es steht im Admin unter «Benachrichtigungen», «Testmeldung senden» prüft die Kette.
 
 ## Admin freischalten
 

@@ -16,7 +16,7 @@ const db = {
   ],
   shifts: [], shift_signups: [], matches: [], tables: [], menu_categories: [], menu_items: [],
   orders: [], order_items: [], print_jobs: [], deposit_returns: [], helper_credits: [], helper_consumptions: [], accounts: [], account_bookings: [], account_invoices: [],
-  settings: [{ key: 'signup_mode', value: 'wishes' }, { key: 'assignment_note', value: 'Die Zuteilung erfolgt im Januar 2027. Bis dahin kannst du Wünsche jederzeit ändern.' }, { key: 'helper_credit_per_shift', value: 22 }, { key: 'helper_credit_days', value: ['2027-07-16', '2027-07-17', '2027-07-18'] }, { key: 'helper_credit_note', value: '2 Getränke + 1 Essen pro Schicht' }, { key: 'invoice_iban', value: 'CH93 0076 2011 6238 5295 7' }, { key: 'invoice_creditor', value: { name: 'FC Kirchberg', street: 'Postfach', zip: '3422', city: 'Kirchberg BE' } }, { key: 'invoice_footer', value: 'Zahlbar innert 30 Tagen. Besten Dank für die Unterstützung des FC Beizli «Home of Football».' }],
+  settings: [{ key: 'signup_mode', value: 'wishes' }, { key: 'assignment_note', value: 'Die Zuteilung erfolgt im Januar 2027. Bis dahin kannst du Wünsche jederzeit ändern.' }, { key: 'helper_credit_per_shift', value: 22 }, { key: 'helper_credit_days', value: ['2027-07-16', '2027-07-17', '2027-07-18'] }, { key: 'helper_credit_note', value: '2 Getränke + 1 Essen pro Schicht' }, { key: 'notify_ntfy_topic', value: 'fck-schnittersunnti-demo' }, { key: 'notify_on_register', value: true }, { key: 'invoice_iban', value: 'CH93 0076 2011 6238 5295 7' }, { key: 'invoice_creditor', value: { name: 'FC Kirchberg', street: 'Postfach', zip: '3422', city: 'Kirchberg BE' } }, { key: 'invoice_footer', value: 'Zahlbar innert 30 Tagen. Besten Dank für die Unterstützung des FC Beizli «Home of Football».' }],
 }
 
 // Schichten wie im Seed
@@ -126,6 +126,8 @@ const views = {
     const consumed = db.helper_consumptions.filter(c => c.user_id === p.id).reduce((a, c) => a + Number(c.amount_chf), 0)
     return { user_id: p.id, full_name: p.full_name, team: p.team, helper_code: p.helper_code, credited, consumed, balance: credited - consumed }
   }),
+  page_stats_daily: () => [...Array(20)].map((_, i) => { const d = new Date(Date.now() - i * 864e5).toISOString().slice(0, 10); const v = [3, 8, 12, 5, 9, 14, 22, 7, 4, 6, 11, 9, 5, 3, 8, 10, 6, 4, 7, 5][i]; return { day: d, views: v * 2, visitors: v, mobile: Math.round(v * 0.7) } }),
+  page_stats_paths: () => [{ path: '/', views: 220, visitors: 130 }, { path: '/helfer', views: 95, visitors: 60 }, { path: '/rueckblick-2026', views: 40, visitors: 31 }],
   account_balance: () => db.accounts.map(a => {
     const open = db.account_bookings.filter(b => b.account_id === a.id && !b.invoice_id)
     const inv = db.account_invoices.filter(i => i.account_id === a.id)
@@ -249,6 +251,7 @@ export const mockClient = {
       for (const l of lines) db.helper_consumptions.push({ id: uid(), user_id: b.user_id, menu_item_id: l.it.id, name: l.it.name + (l.it.variant ? ' ' + l.it.variant : ''), qty: l.qty, unit_price_chf: l.it.price_chf, amount_chf: Number(l.it.price_chf) * l.qty, station: p.p_station, booked_by: DEMO_USER.id, created_at: new Date().toISOString() })
       notify(); return { data: [{ balance: b.balance + topup - total, topup }], error: null }
     }
+    if (fn === 'notify_test' || fn === 'track_view') return { data: null, error: null }
     if (fn === 'account_lookup') {
       const b = views.account_balance().find(x => x.code === p.p_code && x.active)
       if (!b) return { data: [], error: null }

@@ -6,6 +6,7 @@ import MatchEditor from '../components/MatchEditor.jsx'
 import OrderAdmin from '../components/OrderAdmin.jsx'
 import HelferKonsum from '../components/HelferKonsum.jsx'
 import Rechnungskonten from '../components/Rechnungskonten.jsx'
+import Besucher from '../components/Besucher.jsx'
 
 export default function Admin() {
   const { profile, loading, session } = useAuth()
@@ -152,6 +153,7 @@ export default function Admin() {
               <p className="mt-6 text-sm text-ink/70">{checked > 0 ? `${checked} Präsenzen erfasst – Einsatzbilanz unter «Helfende».` : 'Noch keine Präsenzen erfasst.'}</p>
             </div>
           </div>
+          <Besucher profiles={profiles} />
         </div>
       )}
 

@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { track } from '../lib/track.js'
 import { useEffect, useState } from 'react'
 import { useAuth } from './AuthProvider.jsx'
 import { supabase, EVENT, asset } from '../lib/supabase.js'
@@ -24,6 +25,7 @@ export default function Layout() {
   const { session, profile } = useAuth()
   const [open, setOpen] = useState(false)
   const { pathname, hash } = useLocation()
+  useEffect(() => { track(pathname) }, [pathname])
 
   useEffect(() => {
     setOpen(false)
