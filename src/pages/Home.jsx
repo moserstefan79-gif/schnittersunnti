@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { EVENT, asset, supabase, supabaseConfigured } from '../lib/supabase.js'
 import Matches from '../components/Matches.jsx'
+import JuniorMascot from '../components/JuniorMascot.jsx'
 
 const Ball = ({ className }) => (
   <svg viewBox="0 0 64 64" className={className} aria-hidden="true">
@@ -123,6 +124,16 @@ export default function Home() {
             <p className="mt-1 text-white/70">Konto erstellen, Schichten merken, die passen – das OK teilt im Januar zu. Wer früh dran ist, hat die Auswahl.</p>
           </div>
           <Link to="/helfer" className="btn btn-primary text-lg justify-self-start md:justify-self-end">Zum Helferportal</Link>
+        </div>
+        <div className="mx-auto max-w-6xl px-4 pb-8">
+          <Link to="/helfer?junioren=1" className="group grid gap-4 sm:grid-cols-[auto_1fr_auto] items-center rounded-2xl bg-white/10 hover:bg-white/15 transition px-5 py-4">
+            <JuniorMascot className="mascot w-24 h-24 sm:w-28 sm:h-28 justify-self-start" />
+            <div>
+              <p className="font-display font-bold text-xl md:text-2xl leading-tight"><span className="text-orange">Neu:</span> Ab 12 Jahren darfst du mithelfen!</p>
+              <p className="mt-1 text-white/70">{stats.junior_shifts} Junioren-Schichten in Küche und Service am {dayList(stats.junior_dows) || 'Samstag & Sonntag'} – Schluss spätestens 20 Uhr, CHF 22.– Guthaben fürs Beizli inklusive.</p>
+            </div>
+            <span className="btn btn-ghost !border-white/30 !text-white group-hover:!bg-white group-hover:!text-ink justify-self-start sm:justify-self-end">Junioren-Schichten</span>
+          </Link>
         </div>
       </section>
 
