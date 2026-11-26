@@ -26,3 +26,18 @@ do $$ begin
     create policy "shifts: admin update" on public.shifts for update to authenticated using (public.is_admin()) with check (public.is_admin());
   end if;
 end $$;
+
+-- Öffentliche Kennzahlen für die Startseite (ohne Login)
+create or replace function public.public_shift_stats()
+returns table (places int, junior_shifts int, junior_places int, junior_dows int[], open_places int)
+language sql security definer set search_path = public stable as $$
+  select
+    coalesce(sum(capacity), 0)::int,
+    count(*) filter (where junior_ok)::int,
+    coalesce(sum(capacity) filter (where junior_ok), 0)::int,
+    coalesce((select array_agg(d order by d) from (select distinct extract(dow from day)::int as d from public.shifts where junior_ok) x), '{}'),
+    (coalesce(sum(capacity), 0) - (select count(*) from public.shift_signups where status = 'confirmed'))::int
+  from public.shifts;
+$$;
+revoke execute on function public.public_shift_stats() from public;
+grant execute on function public.public_shift_stats() to anon, authenticated;

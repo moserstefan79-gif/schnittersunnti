@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { EVENT, asset } from '../lib/supabase.js'
+import { EVENT, asset, supabase, supabaseConfigured } from '../lib/supabase.js'
 import Matches from '../components/Matches.jsx'
 
 const Ball = ({ className }) => (
@@ -56,7 +57,20 @@ function Wheat({ className }) {
   )
 }
 
+const DOW = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
+function dayList(dows) {
+  const n = [...(dows ?? [])].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(d => DOW[d])   // Montag zuerst, Sonntag zuletzt
+  return n.length > 1 ? n.slice(0, -1).join(', ') + ' & ' + n.at(-1) : (n[0] ?? '')
+}
+
 export default function Home() {
+  // Kennzahlen aus der Datenbank (Plätze, Junioren-Schichten) – Fallback auf die Planwerte
+  const [stats, setStats] = useState({ places: 115, junior_shifts: 8, junior_places: 23, junior_dows: [6, 0] })
+  useEffect(() => {
+    if (!supabaseConfigured) return
+    supabase.rpc('public_shift_stats').then(({ data }) => { if (data?.[0]?.places) setStats(data[0]) })
+  }, [])
+
   return (
     <>
       {/* Hero – Logo + Plakat */}
@@ -188,7 +202,7 @@ export default function Home() {
           <div className="grid gap-px bg-white/20 border border-white/20 sm:grid-cols-[auto_1fr]">
             <img src={asset("/fck-wappen.jpg")} alt="Wappen FC Kirchberg BE, gegründet 1924" width="800" height="800" loading="lazy" className="w-full sm:w-56 aspect-square object-cover" />
             <dl className="bg-ink grid grid-cols-2 gap-6 p-6">
-              {[['115', 'Helferplätze'], ['3', 'Festtage'], ['4', 'Länder-Küchen'], ['1924', 'gegründet']].map(([n, l]) => (
+              {[[String(stats.places), 'Helferplätze'], ['3', 'Festtage'], ['4', 'Länder-Küchen'], ['1924', 'gegründet']].map(([n, l]) => (
                 <div key={l}>
                   <dt className="text-white/60">{l}</dt>
                   <dd className="font-display font-extrabold text-4xl text-orange mt-1">{n}</dd>
@@ -206,7 +220,7 @@ export default function Home() {
           <div>
             <h2 className="text-4xl md:text-5xl">Dein Einsatz<br /><span className="swoosh">im Beizli</span></h2>
             <p className="mt-5 text-ink/80 max-w-lg">
-              115 Helferplätze in Theke, Küche, Service, Bar und Kasse – getragen von Mitgliedern und Freunden des
+              {stats.places} Helferplätze in Theke, Küche, Service, Bar und Kasse – getragen von Mitgliedern und Freunden des
               FC Kirchberg. Registriere dich jetzt und merke dir deine Wunschschichten – die Zuteilung macht das OK im Januar, danach wählst du frei, was noch offen ist.
             </p>
           </div>
@@ -228,7 +242,7 @@ export default function Home() {
                 Die Junioren-Schichten dauern drei bis vier Stunden und enden spätestens um 20 Uhr.
               </p>
               <ul className="mt-5 grid gap-2 sm:grid-cols-3 text-sm">
-                {[['Samstag & Sonntag', '8 Schichten, 23 Plätze'], ['Bis 20 Uhr', 'Küche oder Service'], ['CHF 22.– Guthaben', 'Essen und Getränke pro Schicht']].map(([t, d]) => (
+                {[[dayList(stats.junior_dows) || 'Samstag & Sonntag', `${stats.junior_shifts} Schichten, ${stats.junior_places} Plätze`], ['Bis 20 Uhr', 'Küche oder Service'], ['CHF 22.– Guthaben', 'Essen und Getränke pro Schicht']].map(([t, d]) => (
                   <li key={t} className="rounded-xl bg-white/10 px-3 py-2"><p className="font-semibold">{t}</p><p className="text-white/60 text-xs">{d}</p></li>
                 ))}
               </ul>

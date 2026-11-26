@@ -252,6 +252,10 @@ export const mockClient = {
       notify(); return { data: [{ balance: b.balance + topup - total, topup }], error: null }
     }
     if (fn === 'notify_test' || fn === 'track_view') return { data: null, error: null }
+    if (fn === 'public_shift_stats') {
+      const j = db.shifts.filter(s => s.junior_ok)
+      return { data: [{ places: db.shifts.reduce((a, s) => a + s.capacity, 0), junior_shifts: j.length, junior_places: j.reduce((a, s) => a + s.capacity, 0), junior_dows: [...new Set(j.map(s => new Date(s.day).getDay()))].sort(), open_places: 0 }], error: null }
+    }
     if (fn === 'account_lookup') {
       const b = views.account_balance().find(x => x.code === p.p_code && x.active)
       if (!b) return { data: [], error: null }
